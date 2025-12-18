@@ -1,13 +1,13 @@
 package com.myorg.covid_analytics.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.integrator.application.config.security.CustomAuthentication;
-import com.integrator.application.exceptions.ResourceNotFoundException;
-import com.integrator.application.models.security.Token;
-import com.integrator.application.models.security.User;
-import com.integrator.application.services.configuration.UserSettingService;
-import com.integrator.application.services.security.AuthenticationService;
-import com.integrator.application.services.security.CustomUserDetailsService;
+import com.myorg.covid_analytics.config.security.CustomAuthentication;
+import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
+import com.myorg.covid_analytics.models.security.Token;
+import com.myorg.covid_analytics.models.security.User;
+import com.myorg.covid_analytics.services.configuration.UserSettingService;
+import com.myorg.covid_analytics.services.security.AuthenticationService;
+import com.myorg.covid_analytics.services.security.CustomUserDetailsService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,13 +23,15 @@ import org.springframework.util.AntPathMatcher;
 @Component
 @Slf4j
 public class CustomAuthenticationFilter extends FilterErrorHandler {
-    //    filters for fully webflux: https://www.baeldung.com/spring-webflux-filters
-    // tldr: class ExampleWebFilter implements WebFilter
-    private final AuthenticationService authenticationService;
-    private final CustomUserDetailsService customUserDetailsService;
-    private final UserSettingService userSettingService;
 
-    public CustomAuthenticationFilter(ObjectMapper objectMapper, AuthenticationService authenticationService, CustomUserDetailsService customUserDetailsService, UserSettingService userSettingService) {
+    private final AuthenticationService    authenticationService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final UserSettingService       userSettingService;
+
+    public CustomAuthenticationFilter(ObjectMapper objectMapper,
+            AuthenticationService authenticationService,
+            CustomUserDetailsService customUserDetailsService,
+            UserSettingService userSettingService) {
         super(objectMapper);
         this.authenticationService = authenticationService;
         this.customUserDetailsService = customUserDetailsService;
@@ -39,14 +41,15 @@ public class CustomAuthenticationFilter extends FilterErrorHandler {
     //    https://www.geeksforgeeks.org/spring-boot-3-0-jwt-authentication-with-spring-security-using-mysql-database/
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) {
+            HttpServletResponse response, FilterChain filterChain) {
         String authToken = request.getHeader("Authorization");
-//            System.out.println("For Request: " + request.getServletPath() + "\n\n");
-//            System.out.println("Token: " + authToken + "\n\n");
+        //            System.out.println("For Request: " + request.getServletPath() + "\n\n");
+        //            System.out.println("Token: " + authToken + "\n\n");
         try {
+
             if (StringUtils.isBlank(authToken)) {
-                throw new ResourceNotFoundException("The request did not send its Authorization token");
+                throw new ResourceNotFoundException(
+                        "The request did not send its Authorization token");
             }
 
             authenticationService.isJWTValid(authToken);
@@ -58,14 +61,13 @@ public class CustomAuthenticationFilter extends FilterErrorHandler {
 
             Token token = authenticationService.findByTokenAndEnabled(payload, true);
 
-            CustomAuthentication authentication = new CustomAuthentication(
-                    token,
+            CustomAuthentication authentication = new CustomAuthentication(token,
                     customUserDetailsService.getGrantedAuthorities(token.getUser()),
-                    userSettingService.findByEnabledAndUser(true, token.getUser())
-            );
+                    userSettingService.findByEnabledAndUser(true, token.getUser()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = (User) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
             if (user == null) {
                 throw new RuntimeException("SecurityContextHolder User is null");
             }
@@ -73,30 +75,31 @@ public class CustomAuthenticationFilter extends FilterErrorHandler {
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            if (e instanceof AccessDeniedException ||
-                    e instanceof ResourceNotFoundException) {
-                handleError(request, response, HttpStatus.UNAUTHORIZED.value(), e.getMessage());
+            if (e instanceof AccessDeniedException
+                    || e instanceof ResourceNotFoundException) {
+                handleError(request, response, HttpStatus.UNAUTHORIZED.value(),
+                        e.getMessage());
             } else if (e instanceof JwtException) {
-                handleError(request, response, HttpStatus.BAD_REQUEST.value(), "Invalid JWT");
+                handleError(request, response, HttpStatus.BAD_REQUEST.value(),
+                        "Invalid JWT");
             } else {
-                handleError(request, response, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+                handleError(request, response, HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        e.getMessage());
             }
         }
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-//        https://stackoverflow.com/questions/52370411/springboot-bypass-onceperrequestfilter-filters
+        //        https://stackoverflow.com/questions/52370411/springboot-bypass-onceperrequestfilter-filters
         boolean filter;
 
-        filter =
-                new AntPathMatcher().match("/api/auth/**", request.getServletPath()) ||
-                        new AntPathMatcher().match("/sw.js", request.getServletPath()) ||
-                        new AntPathMatcher().match("/*.ico", request.getServletPath()) ||
-                        new AntPathMatcher().match("/dbconsole", request.getServletPath()) ||
-                        new AntPathMatcher().match("/dbconsole/**", request.getServletPath())
-        ;
-//        System.out.println("For Request: " + request.getServletPath() + "\t | " + filter);
+        filter = new AntPathMatcher().match("/api/v1/auth/**", request.getServletPath()) ||
+                //                        new AntPathMatcher().match("/sw.js", request.getServletPath()) ||
+                //                        new AntPathMatcher().match("/*.ico", request.getServletPath()) ||
+                new AntPathMatcher().match("/dbconsole", request.getServletPath())
+                || new AntPathMatcher().match("/dbconsole/**", request.getServletPath());
+        //        System.out.println("For Request: " + request.getServletPath() + "\t | " + filter);
         return filter;
     }
 
