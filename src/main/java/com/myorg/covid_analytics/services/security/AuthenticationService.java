@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -212,11 +213,12 @@ public class AuthenticationService {
         Token token = generateToken(user);
 
         return LoginResponse.builder()
-                .data(LoginResponseData.builder().token(generateJWT(token))
+                .data(LoginResponseData.builder()
+                        .name(user.getName())
+                        .token(generateJWT(token))
                         .grantedAuthorities(
                                 customUserDetailsService.getGrantedAuthorities(user)
-                                        .stream().map(it -> PermitDto.builder()
-                                                .permit(it.getAuthority()).build()).toList())
+                                        .stream().map(GrantedAuthority::getAuthority).toList())
                         .build()).build();
     }
 

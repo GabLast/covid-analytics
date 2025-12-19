@@ -42,18 +42,4 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
-    //for reactive apis
-    @Bean
-    protected WebMvcConfigurer webMvcConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-                configurer.setTaskExecutor(mvcExecutor());
-            }
-        };
-    }
-    @Bean
-    protected ConcurrentTaskExecutor mvcExecutor() {
-        return new ConcurrentTaskExecutor(Executors.newFixedThreadPool(5));
-    }
 }
