@@ -32,6 +32,7 @@ public class SpringSecurityConfig {
                         .requestMatchers("/public/**").permitAll() // Allow public access
                         .requestMatchers(PathRequest.toH2Console()).permitAll() // Allow public access
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll() // Allow auth
+                        .requestMatchers(HttpMethod.GET, "/api/v1/permits").authenticated()
                         .anyRequest().authenticated() // Require authentication for all other requests
                 )
                 .csrf(AbstractHttpConfigurer::disable)

@@ -3,10 +3,8 @@ package com.myorg.covid_analytics.services.redis;
 import com.myorg.covid_analytics.dto.response.redis.CovidTotals;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Optional;
 
 @Service

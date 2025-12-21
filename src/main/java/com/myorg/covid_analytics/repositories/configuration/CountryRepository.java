@@ -1,13 +1,12 @@
 package com.myorg.covid_analytics.repositories.configuration;
 
 import com.myorg.covid_analytics.models.configurations.Country;
-import com.myorg.covid_analytics.models.configurations.UserSetting;
-import com.myorg.covid_analytics.models.security.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,7 +17,7 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
             "from Country as u " +
             "where u.enabled = :enabled " +
             "and ("
-            + "(lower(trim(u.country)) like trim(lower(:value))) "
+            + "(lower(trim(u.name)) like trim(lower(:value))) "
             + "or (lower(trim(u.countryCode)) like trim(lower(:value))) "
             + "or (lower(trim(u.placeId)) like trim(lower(:value))) "
             + "or (lower(trim(u.wikiDataId)) like trim(lower(:value))) "
@@ -28,4 +27,6 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
             + ")"
     )
     Optional<Country> findByAnyIdentifier(@Param("enabled") boolean enabled, @Param("value") String value);
+
+    List<Country> findAllByEnabled(boolean e);
 }

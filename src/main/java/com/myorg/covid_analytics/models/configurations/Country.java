@@ -1,19 +1,12 @@
 package com.myorg.covid_analytics.models.configurations;
 
 import com.myorg.covid_analytics.models.BaseModel;
-import com.myorg.covid_analytics.models.security.User;
-import com.myorg.covid_analytics.utils.GlobalConstants;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.TimeZone;
 
 @Getter
 @Setter
@@ -31,7 +24,7 @@ public class Country extends BaseModel {
         CANADA("Canada", "CA", "ChIJ2WrMN9MDDUsRpY9Doiq3aJk", "Q16", "country/CAN", "CA",
                 "CAN");
 
-        private final String country;
+        private final String name;
         private final String countryCode;
         private final String placeId;
         private final String wikiDataId;
@@ -40,7 +33,7 @@ public class Country extends BaseModel {
         private final String iso_3166_1_alpha_3;
     }
 
-    private String country;
+    private String name;
     private String countryCode;
     private String placeId;
     private String wikiDataId;

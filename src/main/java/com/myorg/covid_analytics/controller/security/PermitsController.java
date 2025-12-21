@@ -1,14 +1,12 @@
 package com.myorg.covid_analytics.controller.security;
 
-import com.myorg.covid_analytics.dto.security.LoginRequest;
-import com.myorg.covid_analytics.services.security.AuthenticationService;
 import com.myorg.covid_analytics.services.security.PermitService;
+import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,9 +20,8 @@ public class PermitsController {
     private final PermitService permitService;
 
     @GetMapping
-    public ResponseEntity<?> listPermits()
-            throws NoSuchAlgorithmException {
-        return new ResponseEntity<>(permitService.findAllByEnabled(true), HttpStatus.OK);
+    public ResponseEntity<?> listPermits() {
+        return new ResponseEntity<>(permitService.findAllResponse(), HttpStatus.OK);
     }
 
 }

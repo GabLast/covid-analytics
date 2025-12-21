@@ -20,7 +20,8 @@ import lombok.Setter;
 public class Permit extends BaseModel {
 
     public static final String DASHBOARD = "DASHBOARD";
-    public static final String DASHBOARD_TAB = "DASHBOARD_TAB";
+    public static final String DASHBOARD_TAB_ONE = "DASHBOARD_TAB_ONE";
+    public static final String DASHBOARD_TAB_TWO = "DASHBOARD_TAB_TWO";
 
     //***********************************************************************************
 

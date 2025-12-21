@@ -1,5 +1,7 @@
 package com.myorg.covid_analytics.services.security;
 
+import com.myorg.covid_analytics.dto.response.security.PermitData;
+import com.myorg.covid_analytics.dto.response.security.PermitResponse;
 import com.myorg.covid_analytics.models.security.Permit;
 import com.myorg.covid_analytics.repositories.security.PermitRepository;
 import com.myorg.covid_analytics.services.BaseService;
@@ -26,7 +28,8 @@ public class PermitService extends BaseService<Permit, Long> {
 
     public void bootstrap() {
         Permit dashboard = create(null, Permit.DASHBOARD, "Dashboard", "Dashboard");
-        create(dashboard, Permit.DASHBOARD_TAB, "Dashboard Tab", "Dashboard Tab");
+        create(dashboard, Permit.DASHBOARD_TAB_ONE, "Dashboard Tab One", "Dashboard Tab One");
+        create(dashboard, Permit.DASHBOARD_TAB_TWO, "Dashboard Tab Two", "Dashboard Tab Two");
 
         //********************************************************************
 
@@ -71,20 +74,31 @@ public class PermitService extends BaseService<Permit, Long> {
         return tmp;
     }
 
+    @Transactional(readOnly = true)
     public Permit findFirstByCodeAndEnabled(boolean enabled, String code) {
         return permitRepository.findFirstByEnabledAndCode(enabled, code);
     }
 
+    @Transactional(readOnly = true)
     public List<Permit> findAllByEnabled(boolean enabled) {
         return permitRepository.findAllByEnabled(enabled);
     }
 
+    @Transactional(readOnly = true)
     public List<Permit> findAllByEnabledAndPermitFatherIsNull(boolean enabled) {
         return permitRepository.findAllByEnabledAndPermitFatherIsNull(enabled);
     }
 
+    @Transactional(readOnly = true)
     public List<Permit> findAllByEnabledAndPermitFather(boolean enabled, Permit father) {
         return permitRepository.findAllByEnabledAndPermitFather(enabled, father);
     }
 
+    public PermitResponse findAllResponse() {
+        return PermitResponse.builder()
+                .data(PermitData.builder()
+                        .permits(findAllByEnabled(true).stream().map(it -> it.getCode()).toList())
+                        .build())
+                .build();
+    }
 }

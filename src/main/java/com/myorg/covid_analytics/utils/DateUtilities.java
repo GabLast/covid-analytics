@@ -1,10 +1,12 @@
 package com.myorg.covid_analytics.utils;
 
+import com.myorg.covid_analytics.models.configurations.UserSetting;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -213,6 +215,19 @@ public class DateUtilities {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 59);
+    }
+
+    public static String getLocalDateAsString(LocalDate localDate, UserSetting userSetting) {
+        if(localDate == null) {
+            return "";
+        }
+
+        if(userSetting == null) {
+            userSetting = new UserSetting();
+        }
+
+        DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern(userSetting.getDateFormat());
+        return localDate.format(customFormatter);
     }
 
 }

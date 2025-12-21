@@ -2,7 +2,6 @@ package com.myorg.covid_analytics.services.process;
 
 import com.myorg.covid_analytics.models.process.CovidLoadHeader;
 import com.myorg.covid_analytics.repositories.process.CovidLoadHeaderRepository;
-import com.myorg.covid_analytics.repositories.security.PermitRepository;
 import com.myorg.covid_analytics.services.BaseService;
 import com.myorg.covid_analytics.utils.DateUtilities;
 import com.myorg.covid_analytics.utils.OffsetBasedPageRequest;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -47,7 +47,7 @@ public class CovidLoadHeaderService extends BaseService<CovidLoadHeader, Long> {
     }
 
     @Transactional(readOnly = true)
-    public Long countAllFilter(
+    public Integer countAllFilter(
             boolean enabled, String timeZoneId,
             Long userId, String description,
             LocalDate dateStart, LocalDate dateEnd) {
@@ -59,5 +59,13 @@ public class CovidLoadHeaderService extends BaseService<CovidLoadHeader, Long> {
                 DateUtilities.getLocalDateAtTimeZoneAtStartOrEnd(timeZoneId, dateStart, true),
                 DateUtilities.getLocalDateAtTimeZoneAtStartOrEnd(timeZoneId, dateEnd, false)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasThereBeenALoadOnDate(LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end   = date.plusDays(1).atStartOfDay();
+
+        return repository.countCovidLoadHeaderByLoadedDateAndEnabled(start, end, true) > 0;
     }
 }

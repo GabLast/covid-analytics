@@ -1,5 +1,8 @@
 package com.myorg.covid_analytics.services.security;
 
+import com.myorg.covid_analytics.dto.response.security.UserFindAllData;
+import com.myorg.covid_analytics.dto.response.security.UserFindAllDataDetails;
+import com.myorg.covid_analytics.dto.response.security.UserFindAllResponse;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
 import com.myorg.covid_analytics.models.configurations.UserSetting;
@@ -27,7 +30,7 @@ public class UserService extends BaseService<User, Long> {
 
     private final UserRepository     userRepository;
     private final ProfileUserService profileUserService;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder    passwordEncoder;
 
     @Override
     protected JpaRepository<User, Long> getRepository() {
@@ -64,27 +67,21 @@ public class UserService extends BaseService<User, Long> {
     }
 
     @Transactional(readOnly = true)
-    public List<User> findAllFilter(Boolean enabled, String name, String mail, Boolean admin, int limit, int offset, Sort sort) {
-        return userRepository.findAllFilter(
-                enabled,
-                name,
-                mail,
-                admin,
-                sort == null ? new OffsetBasedPageRequest(limit, offset) : new OffsetBasedPageRequest(limit, offset, sort)
-        );
+    public List<User> findAllFilter(Boolean enabled, String name, String mail,
+            Boolean admin, int limit, int offset, Sort sort) {
+        return userRepository.findAllFilter(enabled, name, mail, admin,
+                sort == null ? new OffsetBasedPageRequest(limit, offset)
+                             : new OffsetBasedPageRequest(limit, offset, sort));
     }
 
     @Transactional(readOnly = true)
-    public Integer countAllFilter(Boolean enabled, String name, String mail, Boolean admin) {
-        return userRepository.countAllFilter(
-                enabled,
-                name,
-                mail,
-                admin
-        );
+    public Integer countAllFilter(Boolean enabled, String name, String mail,
+            Boolean admin) {
+        return userRepository.countAllFilter(enabled, name, mail, admin);
     }
 
-    public User saveUser(User user, List<ProfileUser> details, List<ProfileUser> listDelete, UserSetting userSetting) {
+    public User saveUser(User user, List<ProfileUser> details,
+            List<ProfileUser> listDelete, UserSetting userSetting) {
         user = createUser(user, userSetting);
 
         for (ProfileUser profileUser : listDelete) {
@@ -116,12 +113,15 @@ public class UserService extends BaseService<User, Long> {
             throw new ResourceNotFoundException("The mail can not be blank");
         }
 
-        if (findByUsername(user.getUsername()) != null && !tmp.getId().equals(user.getId())) {
-            throw new ResourceExistsException("This usernameMail has already been taken. Please select a new one.");
+        if (findByUsername(user.getUsername()) != null && !tmp.getId()
+                .equals(user.getId())) {
+            throw new ResourceExistsException(
+                    "This usernameMail has already been taken. Please select a new one.");
         }
 
         if (findByMail(user.getMail()) != null && !tmp.getId().equals(user.getId())) {
-            throw new ResourceExistsException("This mail has already been taken. Please select a new one.");
+            throw new ResourceExistsException(
+                    "This mail has already been taken. Please select a new one.");
         }
 
         user.setUsername(username);
@@ -140,11 +140,19 @@ public class UserService extends BaseService<User, Long> {
             throw new ResourceNotFoundException("User can not be null");
         }
 
-        for (ProfileUser profile : profileUserService.findAllByEnabledAndUser(true, user)) {
+        for (ProfileUser profile : profileUserService.findAllByEnabledAndUser(true,
+                user)) {
             profileUserService.delete(profile);
         }
 
         disable(user);
+    }
+
+    public UserFindAllResponse findAllResponse() {
+        return UserFindAllResponse.builder().data(UserFindAllData.builder().dataList(
+                findAll().stream()
+                        .map(it -> UserFindAllDataDetails.builder().id(it.getId())
+                                .name(it.getName()).build()).toList()).build()).build();
     }
 
 }

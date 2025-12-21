@@ -4,6 +4,6 @@ import com.myorg.covid_analytics.dto.JsonRequest;
 
 import java.time.LocalDate;
 
-public record CovidLoadRequest(Long userId, LocalDate date, String description, String json, String jsonURL)
+public record CovidLoadRequest(Long id, LocalDate date, String description, String jsonURL, String jsonString)
         implements JsonRequest {
 }
