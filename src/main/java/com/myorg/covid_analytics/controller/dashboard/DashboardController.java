@@ -1,8 +1,7 @@
 package com.myorg.covid_analytics.controller.dashboard;
 
 import com.myorg.covid_analytics.dto.request.dashboard.DashboardTwoFilterRequest;
-import com.myorg.covid_analytics.services.process.CovidLoadDetailService;
-import com.myorg.covid_analytics.services.security.PermitService;
+import com.myorg.covid_analytics.services.process.CovidAnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private final CovidLoadDetailService service;
+    private final CovidAnalyticsService service;
 
     @PreAuthorize(
             "@securityUtils.isAccessGranted(T(com.myorg.covid_analytics.models.security.Permit).DASHBOARD_TAB_ONE)")

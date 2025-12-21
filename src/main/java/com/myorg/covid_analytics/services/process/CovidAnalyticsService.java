@@ -8,11 +8,17 @@ import com.myorg.covid_analytics.converter.PaginationConverter;
 import com.myorg.covid_analytics.dao.CovidDataSet;
 import com.myorg.covid_analytics.dao.CovidRowCsv;
 import com.myorg.covid_analytics.dto.PaginationObject;
+import com.myorg.covid_analytics.dto.request.dashboard.DashboardTwoFilterRequest;
 import com.myorg.covid_analytics.dto.request.process.CovidDetailFilterRequest;
 import com.myorg.covid_analytics.dto.request.process.CovidHeaderFilterRequest;
 import com.myorg.covid_analytics.dto.request.process.CovidLoadRequest;
 import com.myorg.covid_analytics.dto.response.CountResponse;
 import com.myorg.covid_analytics.dto.response.CountResponseData;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneData;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneDataDetails;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneResponse;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardTwoData;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardTwoResponse;
 import com.myorg.covid_analytics.dto.response.process.CovidDetailFilterData;
 import com.myorg.covid_analytics.dto.response.process.CovidDetailFilterDataDetails;
 import com.myorg.covid_analytics.dto.response.process.CovidDetailFilterResponse;
@@ -31,6 +37,7 @@ import com.myorg.covid_analytics.models.process.CovidLoadDetail;
 import com.myorg.covid_analytics.models.process.CovidLoadHeader;
 import com.myorg.covid_analytics.models.security.User;
 import com.myorg.covid_analytics.services.configuration.CountryService;
+import com.myorg.covid_analytics.services.redis.RedisService;
 import com.myorg.covid_analytics.utils.DateUtilities;
 import com.myorg.covid_analytics.utils.Utilities;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -62,6 +69,7 @@ public class CovidAnalyticsService {
 
     private final CovidLoadHeaderService covidLoadHeaderService;
     private final CovidLoadDetailService covidLoadDetailService;
+    private final RedisService           redisService;
     private final CountryService         countryService;
     private final ObjectMapper           objectMapper;
 
@@ -77,7 +85,8 @@ public class CovidAnalyticsService {
         saveObject.setUser(user);
         saveObject.setDescription(request.description().trim());
         saveObject.setJsonURL(request.jsonURL() != null ? request.jsonURL() : "");
-        saveObject.setJsonString(request.jsonString() != null ? request.jsonString() : "");
+        saveObject.setJsonString(
+                request.jsonString() != null ? request.jsonString() : "");
 
         if (header.isPresent()) {
             if ((!StringUtils.isBlank(request.jsonURL()) || !StringUtils.isBlank(
@@ -119,8 +128,7 @@ public class CovidAnalyticsService {
                         false);
                 objectMapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS,
                         true);
-                objectMapper.configure(DeserializationFeature.USE_LONG_FOR_INTS,
-                        true);
+                objectMapper.configure(DeserializationFeature.USE_LONG_FOR_INTS, true);
 
                 CovidDataSet covidDataSet =
                         objectMapper.readValue(response.body(), CovidDataSet.class);
@@ -197,6 +205,8 @@ public class CovidAnalyticsService {
             throw new InvalidDataFormat("No data to load");
         }
 
+        redisService.setDashboardOneCache(getDataDashboardOne());
+
         return buildCovidLoadResponse(saveObject, user, true);
     }
 
@@ -206,10 +216,9 @@ public class CovidAnalyticsService {
                 .data(CovidLoadData.builder().headerId(header.getId())
                         .description(header.getDescription()).loadDate(
                                 DateUtilities.getLocalDateAsString(header.getLoadedDate(),
-                                        (UserSetting) SecurityContextHolder.getContext().getAuthentication()
-                                                .getDetails()))
-                        .jsonURL(header.getJsonURL())
-                        .jsonString(header.getJsonString())
+                                        (UserSetting) SecurityContextHolder.getContext()
+                                                .getAuthentication().getDetails()))
+                        .jsonURL(header.getJsonURL()).jsonString(header.getJsonString())
                         .details(sendDetails ? getDetailsForHeader(header) : null)
                         .build()).build();
     }
@@ -223,10 +232,9 @@ public class CovidAnalyticsService {
                     CovidLoadDataDetail.builder().headerId(header.getId())
                             .country(it.getCountry().getName())
                             .country_code(it.getCountry().getCountryCode())
-                            .date(DateUtilities.getLocalDateAsString(
-                                    it.getDate(),
-                                    (UserSetting) SecurityContextHolder.getContext().getAuthentication()
-                                            .getDetails()))
+                            .date(DateUtilities.getLocalDateAsString(it.getDate(),
+                                    (UserSetting) SecurityContextHolder.getContext()
+                                            .getAuthentication().getDetails()))
                             .new_confirmed(it.getNew_confirmed())
                             .new_deceased(it.getNew_deceased())
                             .new_persons_vaccinated(it.getNew_persons_vaccinated())
@@ -296,120 +304,113 @@ public class CovidAnalyticsService {
     public CovidHeaderFilterResponse findAllHeaderFilter(
             CovidHeaderFilterRequest request) {
 
-        UserSetting userSetting = (UserSetting) SecurityContextHolder.getContext().getAuthentication()
+        UserSetting userSetting =
+                (UserSetting) SecurityContextHolder.getContext().getAuthentication()
                         .getDetails();
 
-        PaginationObject paginationObject = PaginationConverter.fromSimpleValues(
-                request.getSortProperty(),
-                request.getSortOrder(),
-                request.getOffset(),
-                request.getLimit()
-        );
+        PaginationObject paginationObject =
+                PaginationConverter.fromSimpleValues(request.getSortProperty(),
+                        request.getSortOrder(), request.getOffset(), request.getLimit());
 
-        List<CovidHeaderFilterDataDetails> dataList = covidLoadHeaderService.findAllFilter(
-                request.isEnabled(),
-                userSetting.getTimeZoneString(),
-                request.getUserId(),
-                request.getDescription(),
-                request.getDateStart(),
-                request.getDateEnd(),
-                paginationObject.limit(),
-                paginationObject.offset(),
-                paginationObject.sort()
-        ).stream().map(it -> CovidHeaderFilterDataDetails.builder()
-                .id(it.getId())
-                .description(it.getDescription())
-                .userId(it.getUser().getId())
-                .userName(it.getUser().getName())
-                .loadDate(DateUtilities.getLocalDateAsString(it.getLoadedDate(), userSetting))
-                .build()).toList();
+        List<CovidHeaderFilterDataDetails> dataList = covidLoadHeaderService
+                .findAllFilter(request.isEnabled(), userSetting.getTimeZoneString(),
+                        request.getUserId(), request.getDescription(),
+                        request.getDateStart(), request.getDateEnd(),
+                        paginationObject.limit(), paginationObject.offset(),
+                        paginationObject.sort()).stream()
+                .map(it -> CovidHeaderFilterDataDetails.builder().id(it.getId())
+                        .description(it.getDescription()).userId(it.getUser().getId())
+                        .userName(it.getUser().getName()).loadDate(
+                                DateUtilities.getLocalDateAsString(it.getLoadedDate(),
+                                        userSetting)).build()).toList();
 
         return CovidHeaderFilterResponse.builder()
-                .data(CovidHeaderFilterData.builder()
-                        .dataList(dataList)
-                        .build())
-                .build();
+                .data(CovidHeaderFilterData.builder().dataList(dataList).build()).build();
 
     }
 
     public CountResponse countAllHeaderFilter(CovidHeaderFilterRequest request) {
 
-        UserSetting userSetting = (UserSetting) SecurityContextHolder.getContext().getAuthentication()
-                .getDetails();
+        UserSetting userSetting =
+                (UserSetting) SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails();
 
-        return CountResponse.builder()
-                .data(CountResponseData.builder()
-                        .total(covidLoadHeaderService.countAllFilter(
-                                request.isEnabled(),
-                                userSetting.getTimeZoneString(),
-                                request.getUserId(),
-                                request.getDescription(),
-                                request.getDateStart(),
-                                request.getDateEnd()
-                        ))
-                        .build()).build();
+        return CountResponse.builder().data(CountResponseData.builder()
+                .total(covidLoadHeaderService.countAllFilter(request.isEnabled(),
+                        userSetting.getTimeZoneString(), request.getUserId(),
+                        request.getDescription(), request.getDateStart(),
+                        request.getDateEnd())).build()).build();
     }
 
     public CovidDetailFilterResponse findAllDetailFilter(
             CovidDetailFilterRequest request) {
 
-        UserSetting userSetting = (UserSetting) SecurityContextHolder.getContext().getAuthentication()
-                .getDetails();
+        UserSetting userSetting =
+                (UserSetting) SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails();
 
-        PaginationObject paginationObject = PaginationConverter.fromSimpleValues(
-                request.getSortProperty(),
-                request.getSortOrder(),
-                request.getOffset(),
-                request.getLimit()
-        );
+        PaginationObject paginationObject =
+                PaginationConverter.fromSimpleValues(request.getSortProperty(),
+                        request.getSortOrder(), request.getOffset(), request.getLimit());
 
-        List<CovidDetailFilterDataDetails> dataList = covidLoadDetailService.findAllFilter(
-                request.isEnabled(),
-                userSetting.getTimeZoneString(),
-                request.getHeaderId(),
-                request.getCountry(),
-                request.getDateStart(),
-                request.getDateEnd(),
-                paginationObject.limit(),
-                paginationObject.offset(),
-                paginationObject.sort()
-        ).stream().map(it -> CovidDetailFilterDataDetails.builder()
-                .id(it.getId())
-                .country(it.getCountry().getName())
-                .countryCode(it.getCountry().getCountryCode())
-                .date(DateUtilities.getLocalDateAsString(it.getDate(), userSetting))
-                .new_tested(it.getNew_tested())
-                .new_confirmed(it.getNew_confirmed())
-                .new_persons_vaccinated(it.getNew_persons_vaccinated())
-                .new_deceased(it.getNew_deceased())
-                .new_persons_fully_vaccinated(it.getNew_persons_fully_vaccinated())
-                .new_vaccine_doses_administered(it.getNew_vaccine_doses_administered())
-                .population(it.getPopulation())
-                .build()).toList();
+        List<CovidDetailFilterDataDetails> dataList = covidLoadDetailService
+                .findAllFilter(request.isEnabled(), userSetting.getTimeZoneString(),
+                        request.getHeaderId(), request.getCountry(),
+                        request.getDateStart(), request.getDateEnd(),
+                        paginationObject.limit(), paginationObject.offset(),
+                        paginationObject.sort()).stream()
+                .map(it -> CovidDetailFilterDataDetails.builder().id(it.getId())
+                        .country(it.getCountry().getName())
+                        .countryCode(it.getCountry().getCountryCode())
+                        .date(DateUtilities.getLocalDateAsString(it.getDate(),
+                                userSetting)).new_tested(it.getNew_tested())
+                        .new_confirmed(it.getNew_confirmed())
+                        .new_persons_vaccinated(it.getNew_persons_vaccinated())
+                        .new_deceased(it.getNew_deceased()).new_persons_fully_vaccinated(
+                                it.getNew_persons_fully_vaccinated())
+                        .new_vaccine_doses_administered(
+                                it.getNew_vaccine_doses_administered())
+                        .population(it.getPopulation()).build()).toList();
 
         return CovidDetailFilterResponse.builder()
-                .data(CovidDetailFilterData.builder()
-                        .dataList(dataList)
-                        .build())
-                .build();
+                .data(CovidDetailFilterData.builder().dataList(dataList).build()).build();
 
     }
 
     public CountResponse countAllDetailFilter(CovidDetailFilterRequest request) {
 
-        UserSetting userSetting = (UserSetting) SecurityContextHolder.getContext().getAuthentication()
-                .getDetails();
+        UserSetting userSetting =
+                (UserSetting) SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails();
 
-        return CountResponse.builder()
-                .data(CountResponseData.builder()
-                        .total(covidLoadDetailService.countAllFilter(
-                                request.isEnabled(),
-                                userSetting.getTimeZoneString(),
-                                request.getHeaderId(),
-                                request.getCountry(),
-                                request.getDateStart(),
-                                request.getDateEnd()
-                        ))
-                        .build()).build();
+        return CountResponse.builder().data(CountResponseData.builder()
+                .total(covidLoadDetailService.countAllFilter(request.isEnabled(),
+                        userSetting.getTimeZoneString(), request.getHeaderId(),
+                        request.getCountry(), request.getDateStart(),
+                        request.getDateEnd())).build()).build();
+    }
+
+    public DashboardOneResponse getDataDashboardOne() {
+
+        Optional<DashboardOneResponse> result = redisService.getDashboardOneCache();
+        if(result.isEmpty()) {
+            List<DashboardOneDataDetails> data = covidLoadDetailService.getDataDashboardOne();
+            return DashboardOneResponse.builder()
+                    .data(DashboardOneData.builder().details(data).build()).build();
+        } else {
+            return result.get();
+        }
+    }
+
+    public DashboardTwoResponse getDataDashboardTwo(DashboardTwoFilterRequest request) {
+        UserSetting userSetting =
+                (UserSetting) SecurityContextHolder.getContext().getAuthentication()
+                        .getDetails();
+
+        DashboardTwoData data = covidLoadDetailService.getDataDashboardTwo(
+                userSetting.getTimeZoneString(), request.country(), request.dateStart(),
+                request.dateEnd());
+
+        return DashboardTwoResponse.builder().data(data).build();
     }
 }

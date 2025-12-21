@@ -2,8 +2,6 @@ package com.myorg.covid_analytics.models.process;
 
 import com.myorg.covid_analytics.models.BaseModel;
 import com.myorg.covid_analytics.models.configurations.Country;
-import com.opencsv.bean.CsvBindByName;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;

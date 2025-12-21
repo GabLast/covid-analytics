@@ -1,7 +1,7 @@
 package com.myorg.covid_analytics.config.redis;
 
 import com.myorg.covid_analytics.config.AppInfo;
-import com.myorg.covid_analytics.dto.response.redis.CovidTotals;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneResponse;
 import com.myorg.covid_analytics.services.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,8 +66,8 @@ public class RedisConfig {
     }
 
     @Bean
-    protected RedisTemplate<String, CovidTotals> covidTotals() {
-        RedisTemplate<String, CovidTotals> redisTemplate = new RedisTemplate<>();
+    protected RedisTemplate<String, DashboardOneResponse> covidTotals() {
+        RedisTemplate<String, DashboardOneResponse> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(getConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());

@@ -20,10 +20,10 @@ public interface CovidLoadHeaderRepository extends JpaRepository<CovidLoadHeader
             "u " +
             "from CovidLoadHeader as u " +
             "where u.enabled = :enabled " +
-            "and (:description is null or u.description like '' or u.description is null or lower(u.description) like lower(trim(concat('%', :description,'%')))) " +
+            "and (:description is null or cast(u.description as string) like '' or u.description is null or lower(cast(u.description as string)) like lower(trim(cast(concat('%', :description,'%') as string)))) " +
             "and (:userId is null or u.user.id = :userId) " +
             "and (:start is null or u.loadedDate >= :start) " +
-            "and (:end is null or u.loadedDate <= :end) "
+            "and (:end is null or u.loadedDate < :end) "
     )
     List<CovidLoadHeader> findAllFilter(
             @Param("enabled") boolean enabled,
@@ -38,10 +38,10 @@ public interface CovidLoadHeaderRepository extends JpaRepository<CovidLoadHeader
             "count (u) " +
             "from CovidLoadHeader as u " +
             "where u.enabled = :enabled " +
-            "and (:description is null or u.description like '' or u.description is null or lower(u.description) like lower(trim(concat('%', :description,'%')))) " +
+            "and (:description is null or cast(u.description as string) like '' or u.description is null or lower(cast(u.description as string)) like lower(trim(cast(concat('%', :description,'%') as string)))) " +
             "and (:userId is null or u.user.id = :userId) " +
             "and (:start is null or u.loadedDate >= :start) " +
-            "and (:end is null or u.loadedDate <= :end) "
+            "and (:end is null or u.loadedDate < :end) "
     )
     Integer countAllFilter(
             @Param("enabled") boolean enabled,

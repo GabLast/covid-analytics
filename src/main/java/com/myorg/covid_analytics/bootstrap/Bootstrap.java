@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class Bootstrap implements ApplicationRunner {
 
-    private final UserService   userService;
-    private final PermitService  permitService;
-    private final CountryService countryService;
+    private final UserService           userService;
+    private final PermitService         permitService;
+    private final CountryService        countryService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -26,6 +26,7 @@ public class Bootstrap implements ApplicationRunner {
             userService.bootstrap();
             permitService.bootstrap();
             countryService.bootstrap();
+
         } catch (Exception e) {
             log.error(e.getMessage());
         }

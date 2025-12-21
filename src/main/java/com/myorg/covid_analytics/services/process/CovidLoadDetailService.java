@@ -1,9 +1,7 @@
 package com.myorg.covid_analytics.services.process;
 
-import com.myorg.covid_analytics.dto.request.dashboard.DashboardTwoFilterRequest;
-import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneResponse;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneDataDetails;
 import com.myorg.covid_analytics.dto.response.dashboard.DashboardTwoData;
-import com.myorg.covid_analytics.dto.response.dashboard.DashboardTwoResponse;
 import com.myorg.covid_analytics.models.process.CovidLoadDetail;
 import com.myorg.covid_analytics.models.process.CovidLoadHeader;
 import com.myorg.covid_analytics.repositories.process.CovidLoadDetailRepository;
@@ -65,14 +63,18 @@ public class CovidLoadDetailService extends BaseService<CovidLoadDetail, Long> {
     }
 
     @Transactional(readOnly = true)
-    public DashboardOneResponse getDataDashboardOne() {
-
-        return DashboardOneResponse.builder().build();
+    public List<DashboardOneDataDetails> getDataDashboardOne() {
+        return repository.getDataDashboardOne();
     }
 
     @Transactional(readOnly = true)
-    public DashboardTwoResponse getDataDashboardTwo(DashboardTwoFilterRequest request) {
+    public DashboardTwoData getDataDashboardTwo(String timeZoneId,
+            String countryCode, LocalDate dateStart, LocalDate dateEnd) {
 
-        return DashboardTwoResponse.builder().build();
+        return repository.getDataDashboardTwo(countryCode,
+                DateUtilities.getLocalDateAtTimeZoneAtStartOrEnd(timeZoneId, dateStart,
+                        true),
+                DateUtilities.getLocalDateAtTimeZoneAtStartOrEnd(timeZoneId, dateEnd,
+                        false));
     }
 }

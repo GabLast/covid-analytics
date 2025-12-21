@@ -25,10 +25,10 @@ public class CovidLoadHeader extends BaseModel {
     @ManyToOne(fetch = FetchType.LAZY)
     private User      user;
     private LocalDate loadedDate;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "text")
     private String    description;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "text")
     private String    jsonURL;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "text")
     private String    jsonString;
 }

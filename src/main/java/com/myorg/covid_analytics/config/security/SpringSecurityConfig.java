@@ -2,7 +2,6 @@ package com.myorg.covid_analytics.config.security;
 
 import com.myorg.covid_analytics.filters.CustomAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,7 +29,8 @@ public class SpringSecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/public/**").permitAll() // Allow public access
-                        .requestMatchers(PathRequest.toH2Console()).permitAll() // Allow public access
+                        .requestMatchers("/dbconsole").permitAll() // Allow public access
+//                        .requestMatchers(PathRequest.toH2Console()).permitAll() // use ^ to prevent error when changing to a prod DB
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll() // Allow auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/permits").authenticated()
                         .anyRequest().authenticated() // Require authentication for all other requests

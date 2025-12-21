@@ -3,9 +3,7 @@ package com.myorg.covid_analytics.controller.process;
 import com.myorg.covid_analytics.dto.request.process.CovidDetailFilterRequest;
 import com.myorg.covid_analytics.dto.request.process.CovidHeaderFilterRequest;
 import com.myorg.covid_analytics.dto.request.process.CovidLoadRequest;
-import com.myorg.covid_analytics.dto.response.process.CovidDetailFilterData;
 import com.myorg.covid_analytics.services.process.CovidAnalyticsService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,14 +29,8 @@ public class CovidLoadController {
             "@securityUtils.isAccessGranted(T(com.myorg.covid_analytics.models.security.Permit).LOAD_COVID_DATA_CREATE, "
                     + "T(com.myorg.covid_analytics.models.security.Permit).LOAD_COVID_DATA_EDIT)")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> load(
-            HttpServletRequest req,
-            @RequestPart("metadata") CovidLoadRequest request,
+    public ResponseEntity<?> load(@RequestPart("metadata") CovidLoadRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file) {
-
-        int contentLength = req.getContentLength();
-        long contentLengthLong = req.getContentLengthLong(); // Use this for larger sizes
-        System.out.println("Request size in bytes: " + contentLength);
 
         return new ResponseEntity<>(covidAnalyticsService.save(request, file),
                 HttpStatus.OK);
@@ -68,6 +60,7 @@ public class CovidLoadController {
         return new ResponseEntity<>(covidAnalyticsService.findAllHeaderFilter(request),
                 HttpStatus.OK);
     }
+
     @PreAuthorize(
             "@securityUtils.isAccessGranted(T(com.myorg.covid_analytics.models.security.Permit).LOAD_COVID_DATA_VIEW, "
                     + "T(com.myorg.covid_analytics.models.security.Permit).LOAD_COVID_DATA_EDIT)")
@@ -85,6 +78,7 @@ public class CovidLoadController {
         return new ResponseEntity<>(covidAnalyticsService.findAllDetailFilter(request),
                 HttpStatus.OK);
     }
+
     @PreAuthorize(
             "@securityUtils.isAccessGranted(T(com.myorg.covid_analytics.models.security.Permit).LOAD_COVID_DATA_VIEW, "
                     + "T(com.myorg.covid_analytics.models.security.Permit).LOAD_COVID_DATA_EDIT)")

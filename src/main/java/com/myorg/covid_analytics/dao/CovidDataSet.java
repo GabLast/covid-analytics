@@ -3,9 +3,7 @@ package com.myorg.covid_analytics.dao;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.myorg.covid_analytics.dto.JsonResponse;
-import com.myorg.covid_analytics.exceptions.InvalidDataFormat;
 
-import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

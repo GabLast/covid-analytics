@@ -1,5 +1,6 @@
 package com.myorg.covid_analytics.dto.response.process;
 
+import com.myorg.covid_analytics.dto.JsonResponse;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -19,5 +20,5 @@ public record CovidDetailFilterDataDetails(
         ,BigDecimal new_persons_fully_vaccinated
         ,BigDecimal new_vaccine_doses_administered
         ,BigDecimal population
-) {
+) implements JsonResponse {
 }

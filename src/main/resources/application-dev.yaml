@@ -1,7 +1,8 @@
 spring:
   #h2 datasource for dev enviroment:
   datasource:
-    url: jdbc:h2:file:./data/covid-analytics;MODE=PostgreSQL
+    url: jdbc:h2:file:./data/covid-analytics;MODE=MySQL
+                                             #MODE=PostgreSQL | MySQL
     username: sa
     password:
     driver-class-name: org.h2.Driver

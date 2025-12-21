@@ -1,9 +1,11 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DATABASE_URL:localhost}:${DB_PORT:5432}/${DB_NAME:covid-analytics}?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver #com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DATABASE_URL:localhost}:${DB_PORT:3306}/${DB_NAME:covid-analytics}?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+                      #org.postgresql.Driver #com.mysql.cj.jdbc.Driver
+    embedded-database-connection: none
   jpa:
     show-sql: false
     hibernate:

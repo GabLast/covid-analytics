@@ -2,7 +2,6 @@ package com.myorg.covid_analytics.dao;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
-import com.opencsv.bean.CsvDates;
 import lombok.Data;
 
 import java.math.BigDecimal;

@@ -29,7 +29,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+//                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDate getLocalDateAtTimeZoneAtStartOrEnd(String timeZoneId, LocalDateTime date, boolean startOfDay) {
@@ -48,7 +49,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.toLocalDate().atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.toLocalDate().atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.toLocalDate().plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+        //                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDateTime getLocalDateTimeAtTimeZoneAtStartOrEnd(String timeZoneId, LocalDate date, boolean startOfDay) {
@@ -100,7 +102,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+        //                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDate getLocalDateAtTimeZoneAtStartOrEnd(TimeZone timeZone, LocalDateTime date, boolean startOfDay) {
@@ -114,7 +117,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.toLocalDate().atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.toLocalDate().atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.toLocalDate().plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+        //                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDateTime getLocalDateTimeAtTimeZoneAtStartOrEnd(TimeZone timeZone, LocalDate date, boolean startOfDay) {

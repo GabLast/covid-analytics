@@ -1,6 +1,7 @@
 package com.myorg.covid_analytics.repositories.process;
 
-import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneData;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardOneDataDetails;
+import com.myorg.covid_analytics.dto.response.dashboard.DashboardTwoData;
 import com.myorg.covid_analytics.models.process.CovidLoadDetail;
 import com.myorg.covid_analytics.models.process.CovidLoadHeader;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +23,9 @@ public interface CovidLoadDetailRepository extends JpaRepository<CovidLoadDetail
             "from CovidLoadDetail as u " +
             "where u.enabled = :enabled " +
             "and u.header.id = :headerId " +
-//            "and (:countryCode is null or u.country is null or lower(u.country.countryCode) like lower(trim(concat('%', :countryCode,'%')))) " +
-            "and (:countryCode is null or u.country is null or lower(u.country.countryCode) like lower(trim(:countryCode))) " +
+            "and (:countryCode is null or u.country is null or lower(u.country.countryCode) like lower(trim(cast(:countryCode as string)))) " +
             "and (:start is null or u.date >= :start) " +
-            "and (:end is null or u.date <= :end) "
+            "and (:end is null or u.date < :end) "
     )
     List<CovidLoadDetail> findAllFilter(
             @Param("enabled") boolean enabled,
@@ -41,9 +41,9 @@ public interface CovidLoadDetailRepository extends JpaRepository<CovidLoadDetail
             "from CovidLoadDetail as u " +
             "where u.enabled = :enabled " +
             "and u.header.id = :headerId " +
-            "and (:countryCode is null or u.country is null or lower(u.country.countryCode) like lower(trim(:countryCode))) " +
+            "and (:countryCode is null or u.country is null or lower(u.country.countryCode) like lower(trim(cast(:countryCode as string)))) " +
             "and (:start is null or u.date >= :start) " +
-            "and (:end is null or u.date <= :end) "
+            "and (:end is null or u.date < :end) "
     )
     Integer countAllFilter(
             @Param("enabled") boolean enabled,
@@ -56,11 +56,37 @@ public interface CovidLoadDetailRepository extends JpaRepository<CovidLoadDetail
     @EntityGraph(attributePaths = {"country"})
     List<CovidLoadDetail> findAllByHeaderAndEnabled(CovidLoadHeader header, boolean enabled);
 
-//    @Query("select " +
-//            "sum()" +
-//            "from CovidLoadDetail as u " +
-//            "where u.enabled = true "
-//            + "group by u.id"
-//    )
-//    DashboardOneData getDataDashboardOne();
+    @Query("select\n" +
+            "co.id as countryId,\n" +
+            "co.name as country,\n" +
+            "case \n" +
+            "    when u.population is null then (select max(aux.population) from CovidLoadDetail aux where aux.country = co)\n" +
+            "    else u.population\n" +
+            "    end as population,\n" +
+            "u.population_male as populationMale,\n" +
+            "u.population_female as populationFemale\n" +
+            "from CovidLoadDetail as u\n" +
+            "join country co on u.country = co\n" +
+            "where u.date in (SELECT MAX(detail.date) AS MostRecentDate FROM CovidLoadDetail detail where detail.country = co)\n" +
+            "and u.enabled = true"
+    )
+    List<DashboardOneDataDetails> getDataDashboardOne();
+
+    @Query("select\n" +
+            "      sum(u.new_confirmed) as infections,\n"
+            + "    sum(u.new_deceased) as deaths,\n"
+            + "    sum(u.new_persons_vaccinated) as newPersonVaccinated,\n"
+            + "    sum(u.new_persons_fully_vaccinated) as newPersonFullyVaccinated,\n"
+            + "    sum(u.new_tested) as newTested,\n"
+            + "    sum(u.new_vaccine_doses_administered) as newVaccineDosesAdministered\n"
+            + "from CovidLoadDetail u\n"
+            + "join country co on u.country = co\n"
+            + "where u.enabled = true\n"
+            + "and (:countryCode is null or lower(co.countryCode) like lower(trim(:countryCode)))\n"
+            + "and (:start is null or u.date >= :start)\n"
+            + "and (:end is null or u.date < :end)")
+    DashboardTwoData getDataDashboardTwo(
+            @Param("countryCode") String countryCode,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end);
 }
