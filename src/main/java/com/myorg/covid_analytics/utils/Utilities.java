@@ -1,16 +1,27 @@
 package com.myorg.covid_analytics.utils;
 
+import com.myorg.covid_analytics.exceptions.ClientException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.Id;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.SecretKey;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.stream.Collectors;
+
+import static com.myorg.covid_analytics.utils.GlobalConstants.UPLOADS_TEMP_FILES_PATH;
 
 public class Utilities {
 
@@ -46,7 +57,8 @@ public class Utilities {
         return null;
     }
 
-    public static <T> T setFieldValue(T entity, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
+    public static <T> T setFieldValue(T entity, String fieldName, Object value)
+            throws NoSuchFieldException, IllegalAccessException {
         Field field;
         try {
             field = entity.getClass().getSuperclass().getDeclaredField(fieldName);
@@ -73,7 +85,61 @@ public class Utilities {
 
     public static SecretKey generateJWTKey(String key) {
         //docs at https://github.com/jwtk/jjwt
-//        return Keys.hmacShaKeyFor(key.getBytes());
+        //        return Keys.hmacShaKeyFor(key.getBytes());
         return Keys.hmacShaKeyFor(Base64.getEncoder().encode(key.getBytes()));
+    }
+
+    public static boolean isValidUrl(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            URI uri = url.toURI();
+            // Optional: add further checks for specific schemes, hosts, etc. if needed
+            return true;
+        } catch (MalformedURLException | URISyntaxException e) {
+            return false;
+        }
+    }
+
+    private static Path getWorkingDir() {
+        return Path.of(System.getProperty("user.dir") + UPLOADS_TEMP_FILES_PATH);
+    }
+
+    public static File convertMultipartFileToTempFile(MultipartFile multipartFile) {
+        // Create a new temporary file with a unique name
+        Path tempFile;
+        try {
+            Path projectDir = getWorkingDir();
+
+            tempFile = Files.createTempFile(projectDir, "my-temp-", ".tmp");
+
+            //            tempFile =
+            //                    File.createTempFile("upload-", multipartFile.getOriginalFilename());
+
+            // Use transferTo to move the data
+            multipartFile.transferTo(tempFile);
+//            System.out.println("location: " + tempFile.toAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return tempFile.toFile();
+    }
+
+    public static boolean deleteTempFile(String filename) {
+        try {
+            Path file = getWorkingDir()
+                    .resolve(filename); // Resolve the file's path
+            return Files.deleteIfExists(file); // Deletes the file if it exists
+        } catch (IOException e) {
+            // Handle the exception appropriately (e.g., log the error, throw a custom exception)
+            throw new ClientException("Error deleting file: " + e.getMessage());
+        }
+    }
+
+    public static boolean isCSVFile(MultipartFile file) {
+        String contentType = file.getContentType();
+
+        // Check if the content type is one of the allowed types
+        return "text/csv".equals(contentType);
     }
 }

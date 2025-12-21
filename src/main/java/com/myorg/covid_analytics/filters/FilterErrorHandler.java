@@ -3,6 +3,7 @@ package com.myorg.covid_analytics.filters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myorg.covid_analytics.dto.response.GenericResponse;
+import com.myorg.covid_analytics.dto.response.ResponseInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +23,9 @@ public abstract class FilterErrorHandler extends OncePerRequestFilter {
         response.setStatus(status);
         response.setContentType("application/json");
         GenericResponse genericResponse = GenericResponse.builder()
-                .message(message)
-                .path(request.getRequestURI())
-                .status(status)
+                .responseInfo(ResponseInfo.builder().message(message)
+                        .path(request.getRequestURI())
+                        .status(status).build())
                 .build();
 
         byte[] responseBody = null;

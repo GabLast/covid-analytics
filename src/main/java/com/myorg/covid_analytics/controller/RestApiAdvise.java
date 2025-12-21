@@ -1,11 +1,12 @@
 package com.myorg.covid_analytics.controller;
 
 import com.myorg.covid_analytics.dto.response.GenericResponse;
+import com.myorg.covid_analytics.dto.response.ResponseInfo;
+import com.myorg.covid_analytics.exceptions.ClientException;
 import com.myorg.covid_analytics.exceptions.InvalidDataFormat;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,8 +29,11 @@ public class RestApiAdvise {
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     protected GenericResponse badRequest(ResourceNotFoundException ex,
             WebRequest request) {
-        return GenericResponse.builder().message(ex.getMessage())
-                .status(HttpStatus.NOT_FOUND.value()).path(request.getDescription(false))
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.NOT_FOUND.value()).path(request.getDescription(false))
+                        .build())
                 .build();
     }
 
@@ -38,8 +42,11 @@ public class RestApiAdvise {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CONFLICT)
     protected GenericResponse badRequest(ResourceExistsException ex, WebRequest request) {
-        return GenericResponse.builder().message(ex.getMessage())
-                .status(HttpStatus.CONFLICT.value()).path(request.getDescription(false))
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.CONFLICT.value()).path(request.getDescription(false))
+                        .build())
                 .build();
     }
 
@@ -48,9 +55,12 @@ public class RestApiAdvise {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     protected GenericResponse badRequest(InvalidDataFormat ex, WebRequest request) {
-        return GenericResponse.builder().message(ex.getMessage())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .path(request.getDescription(false)).build();
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.BAD_REQUEST.value()).path(request.getDescription(false))
+                        .build())
+                .build();
     }
 
     @ExceptionHandler(
@@ -58,9 +68,12 @@ public class RestApiAdvise {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     protected GenericResponse badRequest(AccessDeniedException ex, WebRequest request) {
-        return GenericResponse.builder().message(ex.getMessage())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .path(request.getDescription(false)).build();
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.UNAUTHORIZED.value()).path(request.getDescription(false))
+                        .build())
+                .build();
     }
 
     @ExceptionHandler(
@@ -68,8 +81,11 @@ public class RestApiAdvise {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     protected GenericResponse badRequest(NoSuchElementException ex, WebRequest request) {
-        return GenericResponse.builder().message(ex.getMessage())
-                .status(HttpStatus.NOT_FOUND.value()).path(request.getDescription(false))
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.NOT_FOUND.value()).path(request.getDescription(false))
+                        .build())
                 .build();
     }
 
@@ -78,9 +94,12 @@ public class RestApiAdvise {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     protected GenericResponse badRequest(DateTimeParseException ex, WebRequest request) {
-        return GenericResponse.builder().message(ex.getMessage())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .path(request.getDescription(false)).build();
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.BAD_REQUEST.value()).path(request.getDescription(false))
+                        .build())
+                .build();
     }
 
     @ExceptionHandler(
@@ -90,8 +109,36 @@ public class RestApiAdvise {
     protected GenericResponse badRequest(NoSuchAlgorithmException ex,
             WebRequest request) {
         return GenericResponse.builder()
-                .message("generateBase64String Algorithm Error: " + ex.getMessage())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .path(request.getDescription(false)).build();
+                .responseInfo(ResponseInfo.builder()
+                        .message("generateBase64String Algorithm Error: " + ex.getMessage())
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value()).path(request.getDescription(false))
+                        .build())
+                .build();
+    }
+
+    @ExceptionHandler(
+            exception = ClientException.class,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.SERVICE_UNAVAILABLE)
+    protected GenericResponse badRequest(ClientException ex, WebRequest request) {
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.SERVICE_UNAVAILABLE.value()).path(request.getDescription(false))
+                        .build())
+                .build();
+    }
+
+    @ExceptionHandler(
+            exception = IllegalArgumentException.class,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.NOT_ACCEPTABLE)
+    protected GenericResponse badRequest(IllegalArgumentException ex, WebRequest request) {
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.NOT_ACCEPTABLE.value()).path(request.getDescription(false))
+                        .build())
+                .build();
     }
 }

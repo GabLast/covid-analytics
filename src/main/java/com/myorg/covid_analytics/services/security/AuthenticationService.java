@@ -1,10 +1,9 @@
 package com.myorg.covid_analytics.services.security;
 
 import com.myorg.covid_analytics.config.AppInfo;
+import com.myorg.covid_analytics.dto.request.security.LoginRequest;
 import com.myorg.covid_analytics.dto.response.security.LoginResponse;
 import com.myorg.covid_analytics.dto.response.security.LoginResponseData;
-import com.myorg.covid_analytics.dto.response.security.PermitDto;
-import com.myorg.covid_analytics.dto.security.LoginRequest;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
 import com.myorg.covid_analytics.models.configurations.UserSetting;
 import com.myorg.covid_analytics.models.security.Token;
@@ -19,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -212,11 +212,12 @@ public class AuthenticationService {
         Token token = generateToken(user);
 
         return LoginResponse.builder()
-                .data(LoginResponseData.builder().token(generateJWT(token))
+                .data(LoginResponseData.builder()
+                        .name(user.getName())
+                        .token(generateJWT(token))
                         .grantedAuthorities(
                                 customUserDetailsService.getGrantedAuthorities(user)
-                                        .stream().map(it -> PermitDto.builder()
-                                                .permit(it.getAuthority()).build()).toList())
+                                        .stream().map(GrantedAuthority::getAuthority).toList())
                         .build()).build();
     }
 

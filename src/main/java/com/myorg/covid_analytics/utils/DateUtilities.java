@@ -1,10 +1,12 @@
 package com.myorg.covid_analytics.utils;
 
+import com.myorg.covid_analytics.models.configurations.UserSetting;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -27,7 +29,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+//                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDate getLocalDateAtTimeZoneAtStartOrEnd(String timeZoneId, LocalDateTime date, boolean startOfDay) {
@@ -46,7 +49,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.toLocalDate().atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.toLocalDate().atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.toLocalDate().plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+        //                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDateTime getLocalDateTimeAtTimeZoneAtStartOrEnd(String timeZoneId, LocalDate date, boolean startOfDay) {
@@ -98,7 +102,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+        //                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDate getLocalDateAtTimeZoneAtStartOrEnd(TimeZone timeZone, LocalDateTime date, boolean startOfDay) {
@@ -112,7 +117,8 @@ public class DateUtilities {
 
         return startOfDay ?
                 date.toLocalDate().atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate() :
-                date.toLocalDate().atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
+               date.toLocalDate().plusDays(1).atStartOfDay().atZone(timeZone.toZoneId()).toLocalDate();
+        //                date.atTime(LocalTime.MAX).atZone(timeZone.toZoneId()).toLocalDate();
     }
 
     public static LocalDateTime getLocalDateTimeAtTimeZoneAtStartOrEnd(TimeZone timeZone, LocalDate date, boolean startOfDay) {
@@ -213,6 +219,19 @@ public class DateUtilities {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 59);
+    }
+
+    public static String getLocalDateAsString(LocalDate localDate, UserSetting userSetting) {
+        if(localDate == null) {
+            return "";
+        }
+
+        if(userSetting == null) {
+            userSetting = new UserSetting();
+        }
+
+        DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern(userSetting.getDateFormat());
+        return localDate.format(customFormatter);
     }
 
 }

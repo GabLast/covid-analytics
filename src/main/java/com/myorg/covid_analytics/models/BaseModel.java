@@ -15,7 +15,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -34,10 +34,10 @@ public abstract class BaseModel implements Serializable {
     protected String modifiedBy = "system";
 
     @CreatedDate
-    protected Date dateCreated = new Date();
+    protected LocalDateTime dateCreated = LocalDateTime.now();
 
     @LastModifiedDate
-    protected Date lastUpdated = new Date();
+    protected LocalDateTime lastUpdated = LocalDateTime.now();
 
     @Version
     protected Long version;

@@ -1,4 +1,4 @@
-package com.myorg.covid_analytics.dto.security;
+package com.myorg.covid_analytics.dto.request.security;
 
 import com.myorg.covid_analytics.dto.JsonRequest;
 import lombok.Builder;

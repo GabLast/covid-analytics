@@ -26,7 +26,7 @@ public class UserSetting extends BaseModel {
     @Column(nullable = false)
     private boolean darkMode = false;
     @Column(nullable = false)
-    private String dateFormat = "dd/MM/yy";
+    private String dateFormat = "dd/MM/yyyy";
     @Column(nullable = false)
     private String dateTimeFormat = "dd/MM/yyyy hh:mm a";
     @Column(nullable = false)
