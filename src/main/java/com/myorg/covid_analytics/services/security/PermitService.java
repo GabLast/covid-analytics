@@ -57,7 +57,7 @@ public class PermitService extends BaseService<Permit, Long> {
         create(users, Permit.USER_EDIT, "Edit User", "Edit User");
         create(users, Permit.USER_VIEW, "Visualize User", "Visualize User");
         create(users, Permit.USER_DELETE, "Delete User", "Delete User");
-        create(users, Permit.USER_TOKEN, "Create User", "Create User");
+        create(users, Permit.USER_TOKEN, "User Token", "User Token");
 
         log.info("Created Permits");
     }
