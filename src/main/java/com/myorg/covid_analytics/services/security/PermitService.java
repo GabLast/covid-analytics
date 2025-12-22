@@ -1,7 +1,8 @@
 package com.myorg.covid_analytics.services.security;
 
-import com.myorg.covid_analytics.dto.response.security.PermitData;
-import com.myorg.covid_analytics.dto.response.security.PermitResponse;
+import com.myorg.covid_analytics.dto.response.security.PermitFetchData;
+import com.myorg.covid_analytics.dto.response.security.PermitFetchDetail;
+import com.myorg.covid_analytics.dto.response.security.PermitFetchResponse;
 import com.myorg.covid_analytics.models.security.Permit;
 import com.myorg.covid_analytics.repositories.security.PermitRepository;
 import com.myorg.covid_analytics.services.BaseService;
@@ -35,28 +36,28 @@ public class PermitService extends BaseService<Permit, Long> {
 
         Permit processes = create(null, Permit.PROCESSES_MODULE, "Processes Module", "Processes Module");
 
-        Permit testData = create(processes, Permit.MENU_LOAD_COVID_DATA, "Menu - Test Data", "Menu - Test Data");
-        create(testData, Permit.LOAD_COVID_DATA_CREATE, "Menu - Create Test Data", "Menu - Create Test Data");
-        create(testData, Permit.LOAD_COVID_DATA_EDIT, "Menu - Edit Test Data", "Menu - Edit Test Data");
-        create(testData, Permit.LOAD_COVID_DATA_VIEW, "Menu - Visualize Test Data", "Menu - Visualize Test Data");
-        create(testData, Permit.LOAD_COVID_DATA_DELETE, "Menu - Delete Test Data", "Menu - Delete Test Data");
+        Permit testData = create(processes, Permit.MENU_LOAD_COVID_DATA, "Menu - Load Covid Data", "Menu - Load Covid Data");
+        create(testData, Permit.LOAD_COVID_DATA_CREATE, "Create Load Covid Data", "Create Load Covid Data");
+        create(testData, Permit.LOAD_COVID_DATA_EDIT, "Edit Load Covid Data", "Edit Load Covid Data");
+        create(testData, Permit.LOAD_COVID_DATA_VIEW, "Visualize Load Covid Data", "Visualize Load Covid Data");
+        create(testData, Permit.LOAD_COVID_DATA_DELETE, "Delete Load Covid Data", "Delete Load Covid Data");
 
         //********************************************************************
 
         Permit security = create(null, Permit.SECURITY_MODULE, "Security Module", "Security Module");
 
         Permit profiles = create(security, Permit.MENU_PROFILE, "Menu - Profile", "Menu - Profile");
-        create(profiles, Permit.PROFILE_CREATE, "Menu - Create Profile", "Menu - Create Profile");
-        create(profiles, Permit.PROFILE_EDIT, "Menu - Edit Profile", "Menu - Edit Profile");
-        create(profiles, Permit.PROFILE_VIEW, "Menu - Visualize Profile", "Menu - Visualize Profile");
-        create(profiles, Permit.PROFILE_DELETE, "Menu - Delete Profile", "Menu - Delete Profile");
+        create(profiles, Permit.PROFILE_CREATE, "Create Profile", "Create Profile");
+        create(profiles, Permit.PROFILE_EDIT, "Edit Profile", "Edit Profile");
+        create(profiles, Permit.PROFILE_VIEW, "Visualize Profile", "Visualize Profile");
+        create(profiles, Permit.PROFILE_DELETE, "Delete Profile", "Delete Profile");
 
         Permit users = create(security, Permit.MENU_USER, "Menu - User", "Menu - User");
-        create(users, Permit.USER_CREATE, "Menu - Create User", "Menu - Create User");
-        create(users, Permit.USER_EDIT, "Menu - Edit User", "Menu - Edit User");
-        create(users, Permit.USER_VIEW, "Menu - Visualize User", "Menu - Visualize User");
-        create(users, Permit.USER_DELETE, "Menu - Delete User", "Menu - Delete User");
-        create(users, Permit.USER_TOKEN, "Menu - Create User", "Menu - Create User");
+        create(users, Permit.USER_CREATE, "Create User", "Create User");
+        create(users, Permit.USER_EDIT, "Edit User", "Edit User");
+        create(users, Permit.USER_VIEW, "Visualize User", "Visualize User");
+        create(users, Permit.USER_DELETE, "Delete User", "Delete User");
+        create(users, Permit.USER_TOKEN, "Create User", "Create User");
 
         log.info("Created Permits");
     }
@@ -94,10 +95,15 @@ public class PermitService extends BaseService<Permit, Long> {
         return permitRepository.findAllByEnabledAndPermitFather(enabled, father);
     }
 
-    public PermitResponse findAllResponse() {
-        return PermitResponse.builder()
-                .data(PermitData.builder()
-                        .permits(findAllByEnabled(true).stream().map(it -> it.getCode()).toList())
+    public PermitFetchResponse fetchPermits() {
+        return PermitFetchResponse.builder()
+                .data(PermitFetchData.builder()
+                        .permits(findAllByEnabled(true).stream().map(it -> PermitFetchDetail
+                                .builder()
+                                .id(it.getId())
+                                .permit(it.getName())
+                                .code(it.getCode())
+                                .build()).toList())
                         .build())
                 .build();
     }

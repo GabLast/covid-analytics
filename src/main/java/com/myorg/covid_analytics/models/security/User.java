@@ -25,7 +25,7 @@ public class User extends BaseModel {
     private String password;
 
     private String name;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String mail;
 
     @Column(nullable = false)

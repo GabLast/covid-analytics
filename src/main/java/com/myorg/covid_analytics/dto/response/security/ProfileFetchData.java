@@ -6,5 +6,5 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record PermitData(List<PermitRow> permits) implements JsonResponse {
+public record ProfileFetchData(List<ProfileFetchDataDetails> profiles) implements JsonResponse {
 }

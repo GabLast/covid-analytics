@@ -319,8 +319,10 @@ public class CovidAnalyticsService {
                         paginationObject.limit(), paginationObject.offset(),
                         paginationObject.sort()).stream()
                 .map(it -> CovidHeaderFilterDataDetails.builder().id(it.getId())
-                        .description(it.getDescription()).userId(it.getUser().getId())
-                        .userName(it.getUser().getName()).loadDate(
+                        .description(it.getDescription())
+                        .userId(it.getUser() != null ? it.getUser().getId() : null)
+                        .userName(it.getUser() != null ? it.getUser().getName() : null)
+                        .loadDate(
                                 DateUtilities.getLocalDateAsString(it.getLoadedDate(),
                                         userSetting)).build()).toList();
 
