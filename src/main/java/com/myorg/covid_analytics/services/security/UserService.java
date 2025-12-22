@@ -1,11 +1,23 @@
 package com.myorg.covid_analytics.services.security;
 
+import com.myorg.covid_analytics.converter.PaginationConverter;
+import com.myorg.covid_analytics.dto.PaginationObject;
+import com.myorg.covid_analytics.dto.request.security.UserFilterRequest;
+import com.myorg.covid_analytics.dto.request.security.UserRequest;
+import com.myorg.covid_analytics.dto.response.CountResponse;
+import com.myorg.covid_analytics.dto.response.CountResponseData;
+import com.myorg.covid_analytics.dto.response.security.ProfileRow;
+import com.myorg.covid_analytics.dto.response.security.UserFilterData;
+import com.myorg.covid_analytics.dto.response.security.UserFilterDataDetails;
+import com.myorg.covid_analytics.dto.response.security.UserFilterResponse;
 import com.myorg.covid_analytics.dto.response.security.UserFindAllData;
 import com.myorg.covid_analytics.dto.response.security.UserFindAllDataDetails;
 import com.myorg.covid_analytics.dto.response.security.UserFindAllResponse;
+import com.myorg.covid_analytics.dto.response.security.UserResponse;
+import com.myorg.covid_analytics.dto.response.security.UserResponseData;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
-import com.myorg.covid_analytics.models.configurations.UserSetting;
+import com.myorg.covid_analytics.models.security.Profile;
 import com.myorg.covid_analytics.models.security.ProfileUser;
 import com.myorg.covid_analytics.models.security.User;
 import com.myorg.covid_analytics.repositories.security.UserRepository;
@@ -20,7 +32,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -29,6 +43,7 @@ import java.util.List;
 public class UserService extends BaseService<User, Long> {
 
     private final UserRepository     userRepository;
+    private final ProfileService     profileService;
     private final ProfileUserService profileUserService;
     private final PasswordEncoder    passwordEncoder;
 
@@ -45,6 +60,7 @@ public class UserService extends BaseService<User, Long> {
             user.setPassword(passwordEncoder.encode("123"));
             user.setName("Administrator");
             user.setAdmin(true);
+            user.setMail("mail@mail.com");
             saveAndFlush(user);
         }
 
@@ -80,62 +96,57 @@ public class UserService extends BaseService<User, Long> {
         return userRepository.countAllFilter(enabled, name, mail, admin);
     }
 
-    public User saveUser(User user, List<ProfileUser> details,
-            List<ProfileUser> listDelete, UserSetting userSetting) {
-        user = createUser(user, userSetting);
+    public User createUser(UserRequest request) {
 
-        for (ProfileUser profileUser : listDelete) {
-            profileUserService.delete(profileUser);
-        }
 
-        for (ProfileUser detail : details) {
-            detail.setUser(user);
-        }
-        if (!details.isEmpty()) {
-            profileUserService.saveAllAndFlush(details);
-        }
-
-        return user;
-    }
-
-    public User createUser(User user, UserSetting userSetting) {
-
-        User tmp = get(user.getId()).orElse(user);
-
-        String username = StringUtils.deleteWhitespace(user.getUsername()).toLowerCase();
-        String mail = StringUtils.deleteWhitespace(user.getMail()).toLowerCase();
+        String username = StringUtils.deleteWhitespace(request.username()).toLowerCase();
+        String mail = StringUtils.deleteWhitespace(request.email()).toLowerCase();
 
         if (StringUtils.isBlank(username)) {
-            throw new ResourceNotFoundException("The usernameMail can not be blank");
+            throw new ResourceNotFoundException("The username can not be blank");
         }
 
         if (StringUtils.isBlank(mail)) {
             throw new ResourceNotFoundException("The mail can not be blank");
         }
 
-        if (findByUsername(user.getUsername()) != null && !tmp.getId()
-                .equals(user.getId())) {
+        User tmp;
+
+        tmp = findByUsername(request.username());
+
+        if (tmp != null && !tmp.getId().equals(request.id())) {
             throw new ResourceExistsException(
-                    "This usernameMail has already been taken. Please select a new one.");
+                    "This username has already been taken. Please select a new one.");
         }
 
-        if (findByMail(user.getMail()) != null && !tmp.getId().equals(user.getId())) {
+        tmp = findByMail(request.email());
+
+        if (tmp != null && !tmp.getId().equals(request.id())) {
             throw new ResourceExistsException(
                     "This mail has already been taken. Please select a new one.");
         }
 
-        user.setUsername(username);
-        user.setMail(mail);
-        if (!user.getPassword().equals(tmp.getPassword())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (tmp != null && !request.password().equals(tmp.getPassword())) {
+            tmp.setPassword(passwordEncoder.encode(request.password()));
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user = saveAndFlush(user);
 
-        return user;
+        tmp = get(request.id()).orElse(null);
+        if(tmp == null) {
+            tmp = new User();
+            tmp.setPassword(passwordEncoder.encode(request.password()));
+        }
+
+        tmp.setUsername(username);
+        tmp.setName(request.name());
+        tmp.setMail(mail);
+        tmp.setAdmin(request.admin());
+
+        tmp = saveAndFlush(tmp);
+
+        return tmp;
     }
 
-    public void delete(User user, UserSetting userSetting) {
+    public void delete(User user) {
         if (user == null) {
             throw new ResourceNotFoundException("User can not be null");
         }
@@ -148,11 +159,109 @@ public class UserService extends BaseService<User, Long> {
         disable(user);
     }
 
-    public UserFindAllResponse findAllResponse() {
+    public UserFindAllResponse fetchUsers() {
         return UserFindAllResponse.builder().data(UserFindAllData.builder().dataList(
                 findAll().stream()
                         .map(it -> UserFindAllDataDetails.builder().id(it.getId())
                                 .name(it.getName()).build()).toList()).build()).build();
     }
 
+    private UserResponse generateResponse(User user, List<ProfileUser> profiles) {
+        return UserResponse.builder().data(UserResponseData.builder().id(user.getId())
+                .username(user.getUsername()).name(user.getName()).mail(user.getMail())
+                .password(user.getPassword()).admin(user.isAdmin()).profiles(
+                        profiles != null ? profiles.stream()
+                                .map(it -> ProfileRow.builder().profileUserId(it.getId())
+                                        .id(it.getProfile().getId())
+                                        .profile(it.getProfile().getName()).build())
+                                .toList() : null).build()).build();
+    }
+
+    public UserResponse saveUserRequest(UserRequest request) {
+
+        User user = createUser(request);
+
+        for (Long it : request.profilesDelete().stream().map(ProfileRow::profileUserId)
+                .toList()) {
+            Optional<ProfileUser> tmp = profileUserService.get(it);
+            tmp.ifPresent(profileUserService::delete);
+        }
+
+        List<ProfileUser> profiles = new ArrayList<>();
+        for (ProfileRow it : request.profiles()) {
+            Optional<Profile> tmp = profileService.get(it.id());
+            if (tmp.isPresent() && (it.profileUserId() == null
+                    || it.profileUserId() == 0L)) {
+                ProfileUser profileUser = new ProfileUser();
+                profileUser.setUser(user);
+                profileUser.setProfile(tmp.get());
+                profiles.add(profileUser);
+            }
+        }
+
+        if (!profiles.isEmpty()) {
+            profiles = profileUserService.saveAllAndFlush(profiles);
+        }
+
+        return generateResponse(user, profiles);
+    }
+
+    public UserFilterResponse findAllUserFilter(UserFilterRequest request) {
+
+        PaginationObject paginationObject =
+                PaginationConverter.fromSimpleValues(request.getSortProperty(),
+                        request.getSortOrder(), request.getOffset(), request.getLimit());
+
+        List<UserFilterDataDetails> dataList =
+                findAllFilter(request.isEnabled(), request.getName(), request.getMail(),
+                        null, paginationObject.limit(), paginationObject.offset(),
+                        paginationObject.sort()).stream()
+                        .map(it -> UserFilterDataDetails.builder().id(it.getId())
+                                .id(it.getId()).name(it.getName()).email(it.getMail())
+                                .admin(it.isAdmin()).build()).toList();
+
+        return UserFilterResponse.builder()
+                .data(UserFilterData.builder().dataList(dataList).build()).build();
+
+    }
+
+    public CountResponse countAllUserFilter(UserFilterRequest request) {
+
+        return CountResponse.builder().data(CountResponseData.builder()
+                .total(countAllFilter(request.isEnabled(), request.getName(),
+                        request.getMail(), null)).build()).build();
+    }
+
+    public UserResponse delete(Long id) {
+        Optional<User> header = get(id);
+        if (header.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "Object by ID [" + id + "] does not exist");
+        }
+
+        delete(header.get());
+
+        return generateResponse(header.get(), null);
+    }
+
+    public UserResponse getUserById(Long id) {
+        Optional<User> header = get(id);
+        if (header.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "Object by ID [" + id + "] does not exist");
+        }
+
+        return generateResponse(header.get(),
+                profileUserService.findAllByEnabledAndUser(true, header.get()));
+    }
+
+    public UserResponse getUserByUsername(String username) {
+        User header = findByUsernameOrMail(username);
+        if (header == null) {
+            throw new ResourceNotFoundException(
+                    "User by username or mail [" + username + "] does not exist");
+        }
+
+        return generateResponse(header, null);
+    }
 }

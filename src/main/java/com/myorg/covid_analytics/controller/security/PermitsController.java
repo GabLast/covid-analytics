@@ -15,11 +15,10 @@ public class PermitsController {
 
     private final PermitService permitService;
 
-    @GetMapping
-    public ResponseEntity<?> listPermits() {
-        return new ResponseEntity<>(permitService.findAllResponse(), HttpStatus.OK);
+    @GetMapping("fetch")
+    public ResponseEntity<?> findallfetch() {
+        return new ResponseEntity<>(permitService.fetchPermits(), HttpStatus.OK);
     }
-
 }
 
 
