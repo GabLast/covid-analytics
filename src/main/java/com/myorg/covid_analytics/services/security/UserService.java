@@ -15,6 +15,7 @@ import com.myorg.covid_analytics.dto.response.security.UserFindAllDataDetails;
 import com.myorg.covid_analytics.dto.response.security.UserFindAllResponse;
 import com.myorg.covid_analytics.dto.response.security.UserResponse;
 import com.myorg.covid_analytics.dto.response.security.UserResponseData;
+import com.myorg.covid_analytics.exceptions.ClientException;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
 import com.myorg.covid_analytics.models.security.Profile;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -237,6 +239,13 @@ public class UserService extends BaseService<User, Long> {
         if (header.isEmpty()) {
             throw new ResourceNotFoundException(
                     "Object by ID [" + id + "] does not exist");
+        }
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+
+        if(header.get().isAdmin() && user.isAdmin()) {
+            throw new ClientException("A non admin user can not delete any user that has admin privileges");
         }
 
         delete(header.get());
