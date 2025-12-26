@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -52,10 +51,10 @@ public interface CovidLoadHeaderRepository extends JpaRepository<CovidLoadHeader
     );
 
     @Query("select " + "count (a) " + "from CovidLoadHeader as a "
-                    + "where a.enabled = :enabled " + "and a.dateCreated >= :start "
-                    + "and a.dateCreated < :end")
+                    + "where a.enabled = :enabled " + "and a.loadedDate >= :start "
+                    + "and a.loadedDate < :end")
     Integer countCovidLoadHeaderByLoadedDateAndEnabled(
-            @Param("start") LocalDateTime start, @Param("end") LocalDateTime end,
+            @Param("start") LocalDate start, @Param("end") LocalDate end,
             @Param("enabled") boolean enabled);
 
 }

@@ -1,5 +1,6 @@
 package com.myorg.covid_analytics.services.process;
 
+import com.myorg.covid_analytics.models.configurations.UserSetting;
 import com.myorg.covid_analytics.models.process.CovidLoadHeader;
 import com.myorg.covid_analytics.repositories.process.CovidLoadHeaderRepository;
 import com.myorg.covid_analytics.services.BaseService;
@@ -9,11 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -63,9 +64,12 @@ public class CovidLoadHeaderService extends BaseService<CovidLoadHeader, Long> {
 
     @Transactional(readOnly = true)
     public boolean hasThereBeenALoadOnDate(LocalDate date) {
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end   = date.plusDays(1).atStartOfDay();
+        UserSetting setting = (UserSetting) SecurityContextHolder.getContext().getAuthentication()
+                .getDetails();
 
-        return repository.countCovidLoadHeaderByLoadedDateAndEnabled(start, end, true) > 0;
+        return repository.countCovidLoadHeaderByLoadedDateAndEnabled(
+                DateUtilities.getLocalDateAtTimeZoneAtStartOrEnd(setting.getTimeZoneString(), date, true),
+                DateUtilities.getLocalDateAtTimeZoneAtStartOrEnd(setting.getTimeZoneString(), date, false),
+                true) > 0;
     }
 }
