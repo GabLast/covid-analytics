@@ -1,6 +1,7 @@
 package com.myorg.covid_analytics.bootstrap;
 
 import com.myorg.covid_analytics.services.configuration.CountryService;
+import com.myorg.covid_analytics.services.security.AuthenticationService;
 import com.myorg.covid_analytics.services.security.PermitService;
 import com.myorg.covid_analytics.services.security.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +18,14 @@ import org.springframework.stereotype.Component;
 public class Bootstrap implements ApplicationRunner {
 
     private final UserService           userService;
+    private final AuthenticationService authenticationService;
     private final PermitService         permitService;
     private final CountryService        countryService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         try {
-            userService.bootstrap();
+            userService.bootstrap(authenticationService);
             permitService.bootstrap();
             countryService.bootstrap();
 

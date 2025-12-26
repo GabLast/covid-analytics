@@ -10,13 +10,12 @@ import com.myorg.covid_analytics.models.security.Token;
 import com.myorg.covid_analytics.models.security.User;
 import com.myorg.covid_analytics.repositories.security.TokenRepository;
 import com.myorg.covid_analytics.services.configuration.UserSettingService;
-import com.myorg.covid_analytics.utils.GlobalConstants;
+import com.myorg.covid_analytics.utils.DateUtilities;
 import com.myorg.covid_analytics.utils.Utilities;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.UUID;
 
 @Service
@@ -62,9 +60,9 @@ public class AuthenticationService {
             userSetting = new UserSetting();
         }
 
-        if (token.getExpirationDate().toInstant().isBefore(
-                new Date().toInstant().atZone(userSetting.getTimezone().toZoneId())
-                        .toInstant())) {
+        if (token.getExpirationDate().atZone(userSetting.getTimezone().toZoneId())
+                .isBefore(LocalDateTime.now()
+                        .atZone(userSetting.getTimezone().toZoneId()))) {
             throw new ResourceNotFoundException("The token has expired");
         }
 
@@ -83,9 +81,9 @@ public class AuthenticationService {
         }
 
         UserSetting userSetting = userSettingService.findByEnabledAndUser(true, user);
-        TimeZone timeZone = userSetting != null ? userSetting.getTimezone()
-                                                : TimeZone.getTimeZone(
-                                                        GlobalConstants.DEFAULT_TIMEZONE);
+        if (userSetting == null) {
+            userSetting = new UserSetting();
+        }
 
         Token token = findByUserAndEnabled(user, true);
 
@@ -93,35 +91,34 @@ public class AuthenticationService {
             token = new Token();
             token.setUser(user);
 
-            Calendar cal = Calendar.getInstance(timeZone);
-            cal.setTime(new Date());
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-
-            token.setExpirationDate(DateUtils.addDays(cal.getTime(), 7));
-
             token.setToken(generateBase64String(user));
+
+            if (user.isAdmin()) {
+                token.setExpirationDate(LocalDateTime.now().plusYears(99));
+            } else {
+                token.setExpirationDate(
+                        DateUtilities.getLocalDateTimeAtTimeZoneAtStartOrEnd(
+                                userSetting.getTimeZoneString(),
+                                LocalDateTime.now().plusDays(7), true));
+            }
             token = tokenRepository.saveAndFlush(token);
+
+            return token;
         }
 
-        if (token.getExpirationDate().toInstant().isBefore(
-                new Date().toInstant().atZone(timeZone.toZoneId()).toInstant())) {
+        if (token.getExpirationDate().atZone(userSetting.getTimezone().toZoneId())
+                .isBefore(LocalDateTime.now()
+                        .atZone(userSetting.getTimezone().toZoneId()))) {
             token.setEnabled(false);
             tokenRepository.saveAndFlush(token);
 
             token = new Token();
             token.setUser(user);
 
-            Calendar cal = Calendar.getInstance(timeZone);
-            cal.setTime(new Date());
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
+            token.setExpirationDate(DateUtilities.getLocalDateTimeAtTimeZoneAtStartOrEnd(
+                    userSetting.getTimeZoneString(), LocalDateTime.now().plusDays(7),
+                    true));
 
-            token.setExpirationDate(DateUtils.addDays(cal.getTime(), 7));
             token.setToken(generateBase64String(user));
             token = tokenRepository.saveAndFlush(token);
         }
@@ -175,9 +172,9 @@ public class AuthenticationService {
         //if expiration date (future date) is before today (current date)
         //it has to be renewed
         //** only renew the token when required
-        if (token.getExpirationDate().toInstant().isBefore(
-                new Date().toInstant().atZone(userSetting.getTimezone().toZoneId())
-                        .toInstant())) {
+        if (token.getExpirationDate().atZone(userSetting.getTimezone().toZoneId())
+                .isBefore(LocalDateTime.now()
+                        .atZone(userSetting.getTimezone().toZoneId()))) {
             token = generateToken(token.getUser());
         }
 
@@ -185,13 +182,13 @@ public class AuthenticationService {
         //            String decrypted = Utilities.decrypt(token.getToken(), Utilities.generateSecretKey());
 
         //            System.out.println("token: " + token.getToken());
-        //            System.out.println("encripted: " + encryptedData);
+        //            System.out.println("encrypted: " + encryptedData);
         //            System.out.println("decrypted: " + decrypted);
 
         return Jwts.builder().issuer("Integrator-Spring-Boot").subject("data")
                 .claim("token", token.getToken())
                 .signWith(Utilities.generateJWTKey(appInfo.getJwtSecretKey())).expiration(
-                        Date.from(token.getExpirationDate().toInstant()
+                        Date.from(token.getExpirationDate()
                                 .atZone(userSetting.getTimezone().toZoneId())
                                 .toInstant())).compact();
 
@@ -212,13 +209,11 @@ public class AuthenticationService {
         Token token = generateToken(user);
 
         return LoginResponse.builder()
-                .data(LoginResponseData.builder()
-                        .name(user.getName())
-                        .token(generateJWT(token))
-                        .grantedAuthorities(
+                .data(LoginResponseData.builder().name(user.getName())
+                        .token(generateJWT(token)).grantedAuthorities(
                                 customUserDetailsService.getGrantedAuthorities(user)
-                                        .stream().map(GrantedAuthority::getAuthority).toList())
-                        .build()).build();
+                                        .stream().map(GrantedAuthority::getAuthority)
+                                        .toList()).build()).build();
     }
 
 }

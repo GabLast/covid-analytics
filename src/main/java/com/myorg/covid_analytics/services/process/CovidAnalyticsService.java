@@ -28,7 +28,7 @@ import com.myorg.covid_analytics.dto.response.process.CovidHeaderFilterResponse;
 import com.myorg.covid_analytics.dto.response.process.CovidLoadData;
 import com.myorg.covid_analytics.dto.response.process.CovidLoadDataDetail;
 import com.myorg.covid_analytics.dto.response.process.CovidLoadResponse;
-import com.myorg.covid_analytics.exceptions.ClientException;
+import com.myorg.covid_analytics.exceptions.ServerException;
 import com.myorg.covid_analytics.exceptions.InvalidDataFormat;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
@@ -80,21 +80,23 @@ public class CovidAnalyticsService {
                 .getPrincipal();
 
         CovidLoadHeader saveObject = header.orElse(new CovidLoadHeader());
+        if(saveObject.getId() == null || saveObject.getId() == 0L) {
+            saveObject.setUser(user);
+        }
 
         saveObject.setLoadedDate(request.date());
-        saveObject.setUser(user);
         saveObject.setDescription(request.description().trim());
         saveObject.setJsonURL(request.jsonURL() != null ? request.jsonURL() : "");
         saveObject.setJsonString(
                 request.jsonString() != null ? request.jsonString() : "");
 
         if (header.isPresent()) {
-            if ((!StringUtils.isBlank(request.jsonURL()) || !StringUtils.isBlank(
-                    request.jsonString()) || file != null)
-                    && covidLoadHeaderService.hasThereBeenALoadOnDate(LocalDate.now())) {
-                throw new ResourceExistsException(
-                        "The data ingestion has been done today. Feel free to retry tomorrow.");
-            }
+//            if ((!StringUtils.isBlank(request.jsonURL()) || !StringUtils.isBlank(
+//                    request.jsonString()) || file != null)
+//                    && covidLoadHeaderService.hasThereBeenALoadOnDate(LocalDate.now())) {
+//                throw new ResourceExistsException(
+//                        "The data ingestion has been done today. Feel free to retry tomorrow.");
+//            }
 
             saveObject = covidLoadHeaderService.saveAndFlush(saveObject);
             return buildCovidLoadResponse(saveObject, user, false);
@@ -140,7 +142,7 @@ public class CovidAnalyticsService {
                 covidLoadDetailService.saveAllAndFlush(detailsToSave);
 
             } catch (Exception e) {
-                throw new ClientException("Client Error: " + e.getMessage());
+                throw new ServerException("Client Error: " + e.getMessage());
             }
 
         } else if (!StringUtils.isBlank(request.jsonString())) {
@@ -182,7 +184,7 @@ public class CovidAnalyticsService {
                                 .build().parse();
                 fileReader.close();
             } catch (IOException e) {
-                throw new ClientException("Client Error: " + e.getMessage());
+                throw new ServerException("Client Error: " + e.getMessage());
             }
 
             Utilities.deleteTempFile(csvFile.getName());
@@ -205,7 +207,7 @@ public class CovidAnalyticsService {
             throw new InvalidDataFormat("No data to load");
         }
 
-        redisService.setDashboardOneCache(getDataDashboardOne());
+        redisService.setDashboardOneCache(getDataDashboardOne(true));
 
         return buildCovidLoadResponse(saveObject, user, true);
     }
@@ -392,10 +394,10 @@ public class CovidAnalyticsService {
                         request.getDateEnd())).build()).build();
     }
 
-    public DashboardOneResponse getDataDashboardOne() {
+    public DashboardOneResponse getDataDashboardOne(boolean refresh) {
 
         Optional<DashboardOneResponse> result = redisService.getDashboardOneCache();
-        if(result.isEmpty()) {
+        if(result.isEmpty() || refresh) {
             List<DashboardOneDataDetails> data = covidLoadDetailService.getDataDashboardOne();
             return DashboardOneResponse.builder()
                     .data(DashboardOneData.builder().details(data).build()).build();

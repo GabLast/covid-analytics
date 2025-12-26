@@ -1,8 +1,9 @@
 package com.myorg.covid_analytics.utils;
 
-import com.myorg.covid_analytics.exceptions.ClientException;
+import com.myorg.covid_analytics.exceptions.ServerException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.persistence.Id;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.myorg.covid_analytics.utils.GlobalConstants.UPLOADS_TEMP_FILES_PATH;
@@ -76,7 +78,7 @@ public class Utilities {
 
     public static String capitalizeEachWord(String input) {
 
-        if (input == null)
+        if (input == null || StringUtils.isBlank(input))
             return "";
         return Arrays.stream(input.split("\\s+"))
                 .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
@@ -132,7 +134,7 @@ public class Utilities {
             return Files.deleteIfExists(file); // Deletes the file if it exists
         } catch (IOException e) {
             // Handle the exception appropriately (e.g., log the error, throw a custom exception)
-            throw new ClientException("Error deleting file: " + e.getMessage());
+            throw new ServerException("Error deleting file: " + e.getMessage());
         }
     }
 
@@ -141,5 +143,30 @@ public class Utilities {
 
         // Check if the content type is one of the allowed types
         return "text/csv".equals(contentType);
+    }
+
+    public static String cleanStringAndDeleteWhitespace(String string) {
+        if (string == null || StringUtils.isBlank(string))
+            return "";
+
+        return StringUtils.deleteWhitespace(string);
+    }
+
+    public static String cleanStringAndDeleteWhitespaceToLowerCase(String string) {
+        if (string == null || StringUtils.isBlank(string))
+            return "";
+
+        return StringUtils.deleteWhitespace(string).toLowerCase();
+    }
+
+    public static boolean isValidEmail(String string) {
+        // Regular expression to match valid email formats
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+
+        // Compile the regex
+        Pattern p = Pattern.compile(emailRegex);
+
+        return string != null && p.matcher(string).matches();
     }
 }

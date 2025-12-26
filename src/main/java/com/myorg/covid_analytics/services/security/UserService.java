@@ -15,15 +15,19 @@ import com.myorg.covid_analytics.dto.response.security.UserFindAllDataDetails;
 import com.myorg.covid_analytics.dto.response.security.UserFindAllResponse;
 import com.myorg.covid_analytics.dto.response.security.UserResponse;
 import com.myorg.covid_analytics.dto.response.security.UserResponseData;
-import com.myorg.covid_analytics.exceptions.ClientException;
+import com.myorg.covid_analytics.exceptions.InvalidActionException;
+import com.myorg.covid_analytics.exceptions.InvalidDataFormat;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
 import com.myorg.covid_analytics.models.security.Profile;
 import com.myorg.covid_analytics.models.security.ProfileUser;
+import com.myorg.covid_analytics.models.security.Token;
 import com.myorg.covid_analytics.models.security.User;
+import com.myorg.covid_analytics.repositories.security.TokenRepository;
 import com.myorg.covid_analytics.repositories.security.UserRepository;
 import com.myorg.covid_analytics.services.BaseService;
 import com.myorg.covid_analytics.utils.OffsetBasedPageRequest;
+import com.myorg.covid_analytics.utils.Utilities;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +37,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +53,14 @@ public class UserService extends BaseService<User, Long> {
     private final ProfileService     profileService;
     private final ProfileUserService profileUserService;
     private final PasswordEncoder    passwordEncoder;
+    private final TokenRepository    tokenRepository;
 
     @Override
     protected JpaRepository<User, Long> getRepository() {
         return userRepository;
     }
 
-    public void bootstrap() {
+    public void bootstrap(AuthenticationService authenticationService) {
         User user = findByUsername("admin");
         if (user == null) {
             user = new User();
@@ -63,7 +69,14 @@ public class UserService extends BaseService<User, Long> {
             user.setName("Administrator");
             user.setAdmin(true);
             user.setMail("mail@mail.com");
-            saveAndFlush(user);
+            user = saveAndFlush(user);
+        }
+
+        try {
+            authenticationService.generateToken(user);
+        } catch (Exception e) {
+            log.error("Error when generating the token for the admin user: "
+                    + e.getMessage());
         }
 
         log.info("Created admin user");
@@ -100,16 +113,17 @@ public class UserService extends BaseService<User, Long> {
 
     public User createUser(UserRequest request) {
 
-
-        String username = StringUtils.deleteWhitespace(request.username()).toLowerCase();
-        String mail = StringUtils.deleteWhitespace(request.email()).toLowerCase();
+        String username =
+                Utilities.cleanStringAndDeleteWhitespaceToLowerCase(request.username());
+        String mail =
+                Utilities.cleanStringAndDeleteWhitespaceToLowerCase(request.email());
 
         if (StringUtils.isBlank(username)) {
-            throw new ResourceNotFoundException("The username can not be blank");
+            throw new InvalidDataFormat("The username can not be blank");
         }
 
         if (StringUtils.isBlank(mail)) {
-            throw new ResourceNotFoundException("The mail can not be blank");
+            throw new InvalidDataFormat("The mail can not be blank");
         }
 
         User tmp;
@@ -133,7 +147,7 @@ public class UserService extends BaseService<User, Long> {
         }
 
         tmp = get(request.id()).orElse(null);
-        if(tmp == null) {
+        if (tmp == null) {
             tmp = new User();
             tmp.setPassword(passwordEncoder.encode(request.password()));
         }
@@ -183,10 +197,12 @@ public class UserService extends BaseService<User, Long> {
 
         User user = createUser(request);
 
-        for (Long it : request.profilesDelete().stream().map(ProfileRow::profileUserId)
-                .toList()) {
-            Optional<ProfileUser> tmp = profileUserService.get(it);
-            tmp.ifPresent(profileUserService::delete);
+        if (!CollectionUtils.isEmpty(request.profilesDelete())) {
+            for (Long it : request.profilesDelete().stream()
+                    .map(ProfileRow::profileUserId).toList()) {
+                Optional<ProfileUser> tmp = profileUserService.get(it);
+                tmp.ifPresent(profileUserService::delete);
+            }
         }
 
         List<ProfileUser> profiles = new ArrayList<>();
@@ -244,8 +260,14 @@ public class UserService extends BaseService<User, Long> {
         User user = (User) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
 
-        if(header.get().isAdmin() && user.isAdmin()) {
-            throw new ClientException("A non admin user can not delete any user that has admin privileges");
+        if (header.get().isAdmin() && !user.isAdmin()) {
+            throw new InvalidActionException(
+                    "A non admin user can not delete any user that has admin privileges");
+        }
+
+        Token token = tokenRepository.findFirstByUserAndEnabled(header.get(), true);
+        if (token != null) {
+            tokenRepository.delete(token);
         }
 
         delete(header.get());

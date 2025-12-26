@@ -21,7 +21,7 @@ public class DashboardController {
             "@securityUtils.isAccessGranted(T(com.myorg.covid_analytics.models.security.Permit).DASHBOARD_TAB_ONE)")
     @GetMapping("/one")
     public ResponseEntity<?> one() {
-        return new ResponseEntity<>(service.getDataDashboardOne(), HttpStatus.OK);
+        return new ResponseEntity<>(service.getDataDashboardOne(false), HttpStatus.OK);
     }
 
     @PreAuthorize(

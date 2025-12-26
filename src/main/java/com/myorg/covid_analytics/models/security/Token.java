@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,5 +26,5 @@ public class Token extends BaseModel {
     private String token;
 
     @Column(nullable = false)
-    private Date expirationDate;
+    private LocalDateTime expirationDate;
 }

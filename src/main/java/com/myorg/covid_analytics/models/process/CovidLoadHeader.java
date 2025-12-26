@@ -5,6 +5,7 @@ import com.myorg.covid_analytics.models.security.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,10 +26,12 @@ public class CovidLoadHeader extends BaseModel {
     @ManyToOne(fetch = FetchType.LAZY)
     private User      user;
     private LocalDate loadedDate;
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "longtext")
     private String    description;
-    @Column(columnDefinition = "text")
+    @Lob
+    @Column(columnDefinition = "longtext")
     private String    jsonURL;
-    @Column(columnDefinition = "text")
+    @Lob
+    @Column(columnDefinition = "longtext")
     private String    jsonString;
 }

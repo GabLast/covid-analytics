@@ -29,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,25 +100,25 @@ public class ProfileService extends BaseService<Profile, Long> {
 
         profile = create(profile);
 
-        //        for (ProfilePermit profilePermit : profilePermitService.findAllByEnabledAndProfile(
-        //                true, profile)) {
-        //            profilePermitService.delete(profilePermit);
-        //        }
-        for (Long it : request.permitsDelete().stream().map(PermitRow::profilePermitId)
-                .toList()) {
-            Optional<ProfilePermit> tmp = profilePermitService.get(it);
-            tmp.ifPresent(profilePermitService::delete);
+        if(!CollectionUtils.isEmpty(request.permitsDelete())) {
+            for (Long it : request.permitsDelete().stream().map(PermitRow::profilePermitId)
+                    .toList()) {
+                Optional<ProfilePermit> tmp = profilePermitService.get(it);
+                tmp.ifPresent(profilePermitService::delete);
+            }
         }
 
         List<ProfilePermit> permits = new ArrayList<>();
-        for (PermitRow it : request.permits()) {
-            Optional<Permit> tmp = permitService.get(it.id());
-            if (tmp.isPresent() && (it.profilePermitId() == null
-                    || it.profilePermitId() == 0L)) {
-                ProfilePermit profileUser = new ProfilePermit();
-                profileUser.setProfile(profile);
-                profileUser.setPermit(tmp.get());
-                permits.add(profileUser);
+        if(!CollectionUtils.isEmpty(request.permits())) {
+            for (PermitRow it : request.permits()) {
+                Optional<Permit> tmp = permitService.get(it.id());
+                if (tmp.isPresent() && (it.profilePermitId() == null
+                        || it.profilePermitId() == 0L)) {
+                    ProfilePermit profileUser = new ProfilePermit();
+                    profileUser.setProfile(profile);
+                    profileUser.setPermit(tmp.get());
+                    permits.add(profileUser);
+                }
             }
         }
 
