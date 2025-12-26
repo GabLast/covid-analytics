@@ -2,7 +2,8 @@ package com.myorg.covid_analytics.controller;
 
 import com.myorg.covid_analytics.dto.response.GenericResponse;
 import com.myorg.covid_analytics.dto.response.ResponseInfo;
-import com.myorg.covid_analytics.exceptions.ClientException;
+import com.myorg.covid_analytics.exceptions.ServerException;
+import com.myorg.covid_analytics.exceptions.InvalidActionException;
 import com.myorg.covid_analytics.exceptions.InvalidDataFormat;
 import com.myorg.covid_analytics.exceptions.ResourceExistsException;
 import com.myorg.covid_analytics.exceptions.ResourceNotFoundException;
@@ -117,10 +118,10 @@ public class RestApiAdvise {
     }
 
     @ExceptionHandler(
-            exception = ClientException.class,
+            exception = ServerException.class,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.SERVICE_UNAVAILABLE)
-    protected GenericResponse badRequest(ClientException ex, WebRequest request) {
+    protected GenericResponse badRequest(ServerException ex, WebRequest request) {
         return GenericResponse.builder()
                 .responseInfo(ResponseInfo.builder()
                         .message(ex.getMessage())
@@ -138,6 +139,19 @@ public class RestApiAdvise {
                 .responseInfo(ResponseInfo.builder()
                         .message(ex.getMessage())
                         .status(HttpStatus.NOT_ACCEPTABLE.value()).path(request.getDescription(false))
+                        .build())
+                .build();
+    }
+
+    @ExceptionHandler(
+            exception = InvalidActionException.class,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    protected GenericResponse badRequest(InvalidActionException ex, WebRequest request) {
+        return GenericResponse.builder()
+                .responseInfo(ResponseInfo.builder()
+                        .message(ex.getMessage())
+                        .status(HttpStatus.BAD_REQUEST.value()).path(request.getDescription(false))
                         .build())
                 .build();
     }

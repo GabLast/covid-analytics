@@ -19,6 +19,6 @@ public class CronJob {
     @Scheduled(fixedDelay = 60 * 1000 * 60) // every X minutes
     public void setDashboardOneDataInCache() throws InterruptedException {
         log.info("Executing Cron Job: setDashboardOneDataInCache");
-        redisService.setDashboardOneCache(covidAnalyticsService.getDataDashboardOne());
+        redisService.setDashboardOneCache(covidAnalyticsService.getDataDashboardOne(true));
     }
 }

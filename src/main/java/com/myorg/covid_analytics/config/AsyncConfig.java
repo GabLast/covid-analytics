@@ -3,6 +3,7 @@ package com.myorg.covid_analytics.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,8 +18,16 @@ import java.util.concurrent.Executor;
 @RequiredArgsConstructor
 public class AsyncConfig implements AsyncConfigurer {
 
+    @Bean(name = BeanNames.SIMPLE_ASYNC_TASK_EXECUTOR_BEAN)
+    SimpleAsyncTaskExecutor simpleAsyncTaskExecutor() {
+        SimpleAsyncTaskExecutor asyncTaskScheduler = new SimpleAsyncTaskExecutor();
+        asyncTaskScheduler.setVirtualThreads(true);
+        asyncTaskScheduler.setThreadNamePrefix("SimpleAsyncTaskExecutor-");
+        return asyncTaskScheduler;
+    }
+
     @Bean(name = BeanNames.SIMPLE_ASYNC_TASK_SCHEDULER_BEAN)
-    SimpleAsyncTaskScheduler simpleTaskExecutor() {
+    SimpleAsyncTaskScheduler simpleAsyncTaskScheduler() {
         SimpleAsyncTaskScheduler scheduler = new SimpleAsyncTaskScheduler();
         scheduler.setVirtualThreads(true);
         scheduler.setThreadNamePrefix("SimpleAsyncTaskScheduler-");

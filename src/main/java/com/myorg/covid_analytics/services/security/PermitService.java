@@ -57,7 +57,19 @@ public class PermitService extends BaseService<Permit, Long> {
         create(users, Permit.USER_EDIT, "Edit User", "Edit User");
         create(users, Permit.USER_VIEW, "Visualize User", "Visualize User");
         create(users, Permit.USER_DELETE, "Delete User", "Delete User");
-        create(users, Permit.USER_TOKEN, "Create User", "Create User");
+        create(users, Permit.USER_TOKEN, "Create User Token", "Create User Token");
+
+        //********************************************************************
+
+        Permit configs = create(null, Permit.CONFIGURATION_MODULE, "Configuration Module", "Configuration Module");
+
+        Permit countries = create(configs, Permit.MENU_COUNTRY, "Menu - Country", "Menu - Country");
+        create(countries, Permit.COUNTRY_CREATE, "Create Country", "Create Country");
+        create(countries, Permit.COUNTRY_EDIT, "Edit Country", "Edit Country");
+        create(countries, Permit.COUNTRY_VIEW, "Visualize Country", "Visualize Country");
+        create(countries, Permit.COUNTRY_DELETE, "Delete Country", "Delete Country");
+
+        //********************************************************************
 
         log.info("Created Permits");
     }

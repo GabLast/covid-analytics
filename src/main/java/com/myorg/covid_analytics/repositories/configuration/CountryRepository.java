@@ -1,6 +1,7 @@
 package com.myorg.covid_analytics.repositories.configuration;
 
 import com.myorg.covid_analytics.models.configurations.Country;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +30,29 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
     Optional<Country> findByAnyIdentifier(@Param("enabled") boolean enabled, @Param("value") String value);
 
     List<Country> findAllByEnabled(boolean e);
+
+    @Query("select " +
+            "u " +
+            "from Country as u " +
+            "where (:enabled is null or u.enabled = :enabled) " +
+            "and (:name is null or u.name like '' or u.name like lower(trim(concat('%', :name,'%')))) " +
+            "and (:countryCode is null or u.countryCode like '' or u.countryCode like lower(trim(concat('%', :countryCode,'%')))) "
+    )
+    List<Country> findAllFilter(@Param("enabled") Boolean enabled,
+            @Param("name") String name,
+            @Param("countryCode") String countryCode,
+            Pageable pageable
+    );
+
+    @Query("select " +
+            "count(u) " +
+            "from Country as u " +
+            "where (:enabled is null or u.enabled = :enabled) " +
+            "and (:name is null or u.name like '' or u.name like lower(trim(concat('%', :name,'%')))) " +
+            "and (:countryCode is null or u.countryCode like '' or u.countryCode like lower(trim(concat('%', :countryCode,'%')))) "
+    )
+    Integer countAllFilter(@Param("enabled") Boolean enabled,
+            @Param("name") String name,
+            @Param("countryCode") String countryCode
+    );
 }
