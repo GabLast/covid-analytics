@@ -99,7 +99,7 @@ public class CountryService extends BaseService<Country, Long> {
         return repository.countAllFilter(enabled, name, description);
     }
 
-    public CountryFilterResponse findAllProfileFilter(CountryFilterRequest request) {
+    public CountryFilterResponse findAllFilter(CountryFilterRequest request) {
 
         PaginationObject paginationObject =
                 PaginationConverter.fromSimpleValues(request.getSortProperty(),

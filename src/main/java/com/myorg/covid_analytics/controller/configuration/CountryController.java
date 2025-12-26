@@ -30,7 +30,7 @@ public class CountryController {
             "@securityUtils.isAccessGranted(T(com.myorg.covid_analytics.models.security.Permit).MENU_COUNTRY)")
     @GetMapping("findall")
     public ResponseEntity<?> findall(CountryFilterRequest request) {
-        return new ResponseEntity<>(service.findAllProfileFilter(request), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllFilter(request), HttpStatus.OK);
     }
 
     @PreAuthorize(

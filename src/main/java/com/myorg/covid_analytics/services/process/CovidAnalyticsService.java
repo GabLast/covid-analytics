@@ -284,6 +284,8 @@ public class CovidAnalyticsService {
         header.get().setEnabled(false);
         covidLoadHeaderService.saveAndFlush(header.get());
 
+        redisService.setDashboardOneCache(getDataDashboardOne(true));
+
         return buildCovidLoadResponse(header.get(), user, false);
     }
 
