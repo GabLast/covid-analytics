@@ -184,6 +184,7 @@
 					<argLine>
 						-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
 						-Xshare:off
+						<!---Dspring.profiles.active=test--> <!--for default profile-->
 					</argLine>
 				</configuration>
 			</plugin>
