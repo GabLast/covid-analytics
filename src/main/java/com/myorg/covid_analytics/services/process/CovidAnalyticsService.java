@@ -132,17 +132,22 @@ public class CovidAnalyticsService {
                         true);
                 objectMapper.configure(DeserializationFeature.USE_LONG_FOR_INTS, true);
 
-                CovidDataSet covidDataSet =
-                        objectMapper.readValue(response.body(), CovidDataSet.class);
+                CovidDataSet covidDataSet;
+                try {
+                    covidDataSet =
+                            objectMapper.readValue(response.body(), CovidDataSet.class);
 
-                detailsToSave =
-                        CovidLoadAdapter.jsonDatasetToModel(covidDataSet, saveObject,
-                                countryService);
+                    detailsToSave =
+                            CovidLoadAdapter.jsonDatasetToModel(covidDataSet, saveObject,
+                                    countryService);
 
-                covidLoadDetailService.saveAllAndFlush(detailsToSave);
+                    covidLoadDetailService.saveAllAndFlush(detailsToSave);
+                } catch (Exception e) {
+                    throw new InvalidDataFormat("Invalid JSON Format");
+                }
 
             } catch (Exception e) {
-                throw new ServerException("Client Error: " + e.getMessage());
+                throw new ServerException(e.getMessage());
             }
 
         } else if (!StringUtils.isBlank(request.jsonString())) {

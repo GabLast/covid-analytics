@@ -59,16 +59,14 @@ public interface CovidLoadDetailRepository extends JpaRepository<CovidLoadDetail
     @Query("select\n" +
             "co.id as countryId,\n" +
             "co.name as country,\n" +
-            "case \n" +
-            "    when u.population is null then (select max(aux.population) from CovidLoadDetail aux where aux.country = co)\n" +
-            "    else u.population\n" +
-            "    end as population,\n" +
+            "u.population as population,\n" +
             "u.population_male as populationMale,\n" +
             "u.population_female as populationFemale\n" +
             "from CovidLoadDetail as u\n" +
             "join country co on u.country = co\n" +
-            "where u.date in (SELECT MAX(detail.date) AS MostRecentDate FROM CovidLoadDetail detail where detail.country = co)\n" +
-            "and u.enabled = true"
+            "where u.date in (SELECT MAX(detail.date) AS MostRecentDate FROM CovidLoadDetail detail where detail.enabled = true and detail.country = co)\n" +
+            "and u.enabled = true and u.population is not null and u.population_male is not null and u.population_female is not null " +
+            "group by co, u.population, u.population_male, u.population_female"
     )
     List<DashboardOneDataDetails> getDataDashboardOne();
 
