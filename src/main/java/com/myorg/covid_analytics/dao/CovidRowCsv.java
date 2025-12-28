@@ -29,174 +29,174 @@ public class CovidRowCsv {
     @CsvBindByName
     private String     iso_3166_1_alpha_3;
     @CsvBindByName
-    private BigDecimal aggregation_level;
+    private BigDecimal aggregation_level = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal new_confirmed;
+    private BigDecimal new_confirmed = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal new_deceased;
+    private BigDecimal new_deceased = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal new_tested;
+    private BigDecimal new_tested = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cumulative_confirmed;
+    private BigDecimal cumulative_confirmed = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cumulative_deceased;
+    private BigDecimal cumulative_deceased = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cumulative_tested;
+    private BigDecimal cumulative_tested = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal new_persons_vaccinated;
+    private BigDecimal new_persons_vaccinated = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cumulative_persons_vaccinated;
+    private BigDecimal cumulative_persons_vaccinated = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal new_persons_fully_vaccinated;
+    private BigDecimal new_persons_fully_vaccinated = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cumulative_persons_fully_vaccinated;
+    private BigDecimal cumulative_persons_fully_vaccinated = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal new_vaccine_doses_administered;
+    private BigDecimal new_vaccine_doses_administered = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cumulative_vaccine_doses_administered;
+    private BigDecimal cumulative_vaccine_doses_administered = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population;
+    private BigDecimal population = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_male;
+    private BigDecimal population_male = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_female;
+    private BigDecimal population_female = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_rural;
+    private BigDecimal population_rural = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_urban;
+    private BigDecimal population_urban = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_largest_city;
+    private BigDecimal population_largest_city = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_clustered;
+    private BigDecimal population_clustered = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_density;
+    private BigDecimal population_density = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal human_development_index;
+    private BigDecimal human_development_index = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_00_09;
+    private BigDecimal population_age_00_09 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_10_19;
+    private BigDecimal population_age_10_19 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_20_29;
+    private BigDecimal population_age_20_29 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_30_39;
+    private BigDecimal population_age_30_39 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_40_49;
+    private BigDecimal population_age_40_49 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_50_59;
+    private BigDecimal population_age_50_59 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_60_69;
+    private BigDecimal population_age_60_69 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_70_79;
+    private BigDecimal population_age_70_79 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal population_age_80_and_older;
+    private BigDecimal population_age_80_and_older = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal gdp_usd;
+    private BigDecimal gdp_usd = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal gdp_per_capita_usd;
+    private BigDecimal gdp_per_capita_usd = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal human_capital_index;
+    private BigDecimal human_capital_index = BigDecimal.ZERO;
     @CsvBindByName
     private Long       openstreetmap_id;
     @CsvBindByName
-    private BigDecimal latitude;
+    private BigDecimal latitude = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal longitude;
+    private BigDecimal longitude = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal area_sq_km;
+    private BigDecimal area_sq_km = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal area_rural_sq_km;
+    private BigDecimal area_rural_sq_km = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal area_urban_sq_km;
+    private BigDecimal area_urban_sq_km = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal life_expectancy;
+    private BigDecimal life_expectancy = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal smoking_prevalence;
+    private BigDecimal smoking_prevalence = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal diabetes_prevalence;
+    private BigDecimal diabetes_prevalence = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal infant_mortality_rate;
+    private BigDecimal infant_mortality_rate = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal adult_male_mortality_rate;
+    private BigDecimal adult_male_mortality_rate = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal adult_female_mortality_rate;
+    private BigDecimal adult_female_mortality_rate = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal pollution_mortality_rate;
+    private BigDecimal pollution_mortality_rate = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal comorbidity_mortality_rate;
+    private BigDecimal comorbidity_mortality_rate = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal nurses_per_1000;
+    private BigDecimal nurses_per_1000 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal physicians_per_1000;
+    private BigDecimal physicians_per_1000 = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal health_expenditure_usd;
+    private BigDecimal health_expenditure_usd = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal out_of_pocket_health_expenditure_usd;
+    private BigDecimal out_of_pocket_health_expenditure_usd = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal mobility_retail_and_recreation;
+    private BigDecimal mobility_retail_and_recreation = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal mobility_grocery_and_pharmacy;
+    private BigDecimal mobility_grocery_and_pharmacy = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal mobility_parks;
+    private BigDecimal mobility_parks = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal mobility_transit_stations;
+    private BigDecimal mobility_transit_stations = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal mobility_workplaces;
+    private BigDecimal mobility_workplaces = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal mobility_residential;
+    private BigDecimal mobility_residential = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal school_closing;
+    private BigDecimal school_closing = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal workplace_closing;
+    private BigDecimal workplace_closing = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal cancel_public_events;
+    private BigDecimal cancel_public_events = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal restrictions_on_gatherings;
+    private BigDecimal restrictions_on_gatherings = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal public_transport_closing;
+    private BigDecimal public_transport_closing = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal stay_at_home_requirements;
+    private BigDecimal stay_at_home_requirements = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal restrictions_on_internal_movement;
+    private BigDecimal restrictions_on_internal_movement = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal international_travel_controls;
+    private BigDecimal international_travel_controls = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal income_support;
+    private BigDecimal income_support = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal debt_relief;
+    private BigDecimal debt_relief = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal fiscal_measures;
+    private BigDecimal fiscal_measures = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal international_support;
+    private BigDecimal international_support = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal public_information_campaigns;
+    private BigDecimal public_information_campaigns = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal testing_policy;
+    private BigDecimal testing_policy = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal contact_tracing;
+    private BigDecimal contact_tracing = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal emergency_investment_in_healthcare;
+    private BigDecimal emergency_investment_in_healthcare = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal investment_in_vaccines;
+    private BigDecimal investment_in_vaccines = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal facial_coverings;
+    private BigDecimal facial_coverings = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal vaccination_policy;
+    private BigDecimal vaccination_policy = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal stringency_index;
+    private BigDecimal stringency_index = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal average_temperature_celsius;
+    private BigDecimal average_temperature_celsius = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal minimum_temperature_celsius;
+    private BigDecimal minimum_temperature_celsius = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal maximum_temperature_celsius;
+    private BigDecimal maximum_temperature_celsius = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal rainfall_mm;
+    private BigDecimal rainfall_mm = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal snowfall_mm;
+    private BigDecimal snowfall_mm = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal dew_point;
+    private BigDecimal dew_point = BigDecimal.ZERO;
     @CsvBindByName
-    private BigDecimal relative_humidity;
+    private BigDecimal relative_humidity = BigDecimal.ZERO;
 
 }
