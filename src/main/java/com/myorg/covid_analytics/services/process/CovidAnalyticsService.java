@@ -237,8 +237,8 @@ public class CovidAnalyticsService {
                 true)) {
             CovidLoadDataDetail tmp =
                     CovidLoadDataDetail.builder().headerId(header.getId())
-                            .country(it.getCountry().getName())
-                            .country_code(it.getCountry().getCountryCode())
+                            .country(it.getCountry() != null ? it.getCountry().getName() : null)
+                            .country_code(it.getCountry() != null ? it.getCountry().getCountryCode() : null)
                             .date(DateUtilities.getLocalDateAsString(it.getDate(),
                                     (UserSetting) SecurityContextHolder.getContext()
                                             .getAuthentication().getDetails()))
