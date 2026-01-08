@@ -19,3 +19,10 @@
 - CSV
 2. Authentication
 3. Security Management
+
+### TODO / Stack to test
+
+1. Use Kafka to load the data and notify the UI about the loaded dataset
+- Could send the whole request to this service then this one could produce the message for the topic.
+- Another service could consume this message and do the data load. This service would then produce a message to be consumed by the UI.
+- The UI would consume the notification message to know when the data has been loaded.

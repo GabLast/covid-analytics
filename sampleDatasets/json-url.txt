@@ -1,0 +1,3 @@
+https://storage.googleapis.com/covid19-open-data/v3/location/US.json
+
+https://storage.googleapis.com/covid19-open-data/v3/location/CA.json
